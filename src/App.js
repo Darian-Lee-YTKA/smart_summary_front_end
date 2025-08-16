@@ -1134,7 +1134,7 @@ export default function App() {
 
       {showClientDataModal && renderClientDataModal()}
 
-      <img src="/jirav.svg" alt="Jirav logo" className="footer-logo" />
+      <img src={process.env.PUBLIC_URL + "/jirav.svg"} alt="Jirav logo" className="footer-logo" />
     </div>
   );
 }  

@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/smart_summary_front_end/static/css/main.74de0b71.css",
+    "main.js": "/smart_summary_front_end/static/js/main.dd73f50e.js",
+    "index.html": "/smart_summary_front_end/index.html",
+    "main.74de0b71.css.map": "/smart_summary_front_end/static/css/main.74de0b71.css.map",
+    "main.dd73f50e.js.map": "/smart_summary_front_end/static/js/main.dd73f50e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.74de0b71.css",
+    "static/js/main.dd73f50e.js"
+  ]
+}
