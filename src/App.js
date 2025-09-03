@@ -666,7 +666,7 @@ export default function App() {
         
         {/* Basic Company Information */}
         <div style={{ marginBottom: '2em', padding: '1em', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h3>📋 Basic Information</h3>
+          <h3>Basic Information</h3>
           <div className="form-group">
             <label>Company Name:</label>
             <input
@@ -720,15 +720,21 @@ export default function App() {
 
         {/* Financial Reports Upload */}
         <div style={{ marginBottom: '2em' }}>
-          <h3>📊 Upload Financial Reports</h3>
+          <h3>Upload Financial Reports</h3>
           <p style={{ fontSize: '0.9em', color: '#666', marginBottom: '1em' }}>
             Upload your financial reports to get automatic analysis and insights
           </p>
 
-          {/* Folder Upload Option - RECOMMENDED */}
-          <div style={{ marginBottom: '2em', padding: '1.5em', border: '2px solid #4CAF50', borderRadius: '8px', backgroundColor: '#f8fff8' }}>
-            <h4>🚀 Quick Upload (Recommended)</h4>
-            <p style={{ fontSize: '0.9em', color: '#2E7D32', marginBottom: '0.5em', fontWeight: 'bold' }}>
+          {/* Quick Upload Option - RECOMMENDED */}
+          <div style={{ 
+            marginBottom: '2em', 
+            padding: '1.5em', 
+            border: '2px solid #FBC02D', 
+            borderRadius: '8px', 
+            backgroundColor: '#fffbf0' 
+          }}>
+            <h4 style={{ color: '#B8860B', marginBottom: '0.5em' }}>Quick Upload (Recommended)</h4>
+            <p style={{ fontSize: '0.9em', color: '#B8860B', marginBottom: '0.5em', fontWeight: 'bold' }}>
               Upload all your files at once - they'll be automatically identified by content
             </p>
             <input
@@ -738,18 +744,24 @@ export default function App() {
               onChange={handleFolderUpload}
               style={{ marginBottom: '0.5em' }}
             />
-            <p style={{ fontSize: '0.8em', color: '#4CAF50', marginTop: '0.5em' }}>
-              ⚡ Fastest way to upload multiple reports
+            <p style={{ fontSize: '0.8em', color: '#B8860B', marginTop: '0.5em' }}>
+              Fastest way to upload multiple reports
             </p>
           </div>
 
           {/* Individual File Uploads */}
-          <div style={{ marginTop: '1em', padding: '1em', border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
-            <h4 style={{ color: '#666', marginBottom: '0.5em' }}>📄 Or upload files individually:</h4>
+          <div style={{ 
+            marginTop: '1em', 
+            padding: '1em', 
+            border: '1px solid #ddd', 
+            borderRadius: '8px', 
+            backgroundColor: '#f9f9f9' 
+          }}>
+            <h4 style={{ color: '#666', marginBottom: '0.5em' }}>Or upload files individually:</h4>
 
             {/* Executive Summary */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>📈 Executive Summary</h4>
+              <h4>Executive Summary</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Monthly revenue, cash balance, and net income data
               </p>
@@ -773,7 +785,7 @@ export default function App() {
 
             {/* Income Statement by Department */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>💰 Income Statement by Department</h4>
+              <h4>Income Statement by Department</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Revenue, COGS, operating expenses by department
               </p>
@@ -797,7 +809,7 @@ export default function App() {
 
             {/* Income Statement YoY */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>📊 Income Statement Year-over-Year</h4>
+              <h4>Income Statement Year-over-Year</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Current vs prior year revenue, net income, and gross margin
               </p>
@@ -821,7 +833,7 @@ export default function App() {
 
             {/* Balance Sheet */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>⚖️ Balance Sheet</h4>
+              <h4>Balance Sheet</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Assets, liabilities, and equity breakdown
               </p>
@@ -845,7 +857,7 @@ export default function App() {
 
             {/* Cash Flow */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>💸 Cash Flow Statement</h4>
+              <h4>Cash Flow Statement</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Operating, investing, and financing cash flows
               </p>
@@ -869,7 +881,7 @@ export default function App() {
 
             {/* Finance Record (Budget vs Actuals) */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>📋 Finance Record (Budget vs Actuals)</h4>
+              <h4>Finance Record (Budget vs Actuals)</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Budget vs actual cost variances and anomalies
               </p>
@@ -893,7 +905,7 @@ export default function App() {
 
             {/* Workforce */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>👥 Workforce</h4>
+              <h4>Workforce</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Employee count, turnover, and personnel costs
               </p>
@@ -917,7 +929,7 @@ export default function App() {
 
             {/* Forecasted Executive Summary */}
             <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>🔮 Forecasted Executive Summary</h4>
+              <h4>Forecasted Executive Summary</h4>
               <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
                 Projected revenue, cash balance, and net income data for future periods
               </p>
