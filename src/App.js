@@ -53,6 +53,7 @@ export default function App() {
   const [inputStep, setInputStep] = useState("industryOrNaics");
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
+  const [hasAttemptedCompetitorSearch, setHasAttemptedCompetitorSearch] = useState(false);
   
   // File upload states for client data modal
   const [uploadedFiles, setUploadedFiles] = useState({
@@ -67,6 +68,7 @@ export default function App() {
   });
   const [uploadError, setUploadError] = useState({});
   const [folderUploadMode, setFolderUploadMode] = useState(false);
+  const [uploadedFileNames, setUploadedFileNames] = useState([]);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -107,16 +109,18 @@ export default function App() {
     }
   };
 
-  // New function to handle folder upload
+  // Updated folder upload handler - just collect file names
   const handleFolderUpload = (event) => {
     const files = Array.from(event.target.files);
-    const newUploadedFiles = { ...uploadedFiles };
     const newUploadErrors = { ...uploadError };
     
     // Clear previous errors
     Object.keys(newUploadErrors).forEach(key => {
       newUploadErrors[key] = "";
     });
+    
+    const validFiles = [];
+    const invalidFiles = [];
     
     files.forEach(file => {
       const allowedTypes = [
@@ -126,40 +130,47 @@ export default function App() {
       ];
       
       if (allowedTypes.includes(file.type) || file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        // Try to match file name to report type
-        const fileName = file.name.toLowerCase();
-        let reportType = null;
-        
-        if (fileName.includes('executive') && fileName.includes('summary')) {
-          if (fileName.includes('forecast')) {
-            reportType = 'forecasted_executive_summary';
-          } else {
-            reportType = 'executive_summary';
-          }
-        } else if (fileName.includes('income') && fileName.includes('department')) {
-          reportType = 'income_statement_by_department';
-        } else if (fileName.includes('income') && (fileName.includes('yoy') || fileName.includes('year'))) {
-          reportType = 'income_statement_yoy';
-        } else if (fileName.includes('balance') || fileName.includes('balance_sheet')) {
-          reportType = 'balance_sheet';
-        } else if (fileName.includes('cash') && fileName.includes('flow')) {
-          reportType = 'cash_flow';
-        } else if (fileName.includes('finance') || fileName.includes('budget')) {
-          reportType = 'finance_record';
-        } else if (fileName.includes('workforce') || fileName.includes('employee') || fileName.includes('personnel')) {
-          reportType = 'workforce';
-        }
-        
-        if (reportType) {
-          newUploadedFiles[reportType] = file;
-        }
+        validFiles.push(file.name);
       } else {
+        invalidFiles.push(file.name);
         newUploadErrors[file.name] = "Please upload a CSV or Excel file (.csv, .xlsx, .xls)";
       }
     });
     
-    setUploadedFiles(newUploadedFiles);
+    setUploadedFileNames(validFiles);
     setUploadError(newUploadErrors);
+  };
+
+  // New function to get competitor data suggestions
+  const handleGetCompetitorSuggestions = async () => {
+    setLoading(true);
+    setHasAttemptedCompetitorSearch(true); // Mark that competitor search has been attempted
+    
+    try {
+      const naicsCodeValue = naicsCode;
+      const body = {
+        naics_code: parseInt(naicsCodeValue),
+        keywords: keywords.trim() || undefined
+      };
+      
+      const response = await fetch('/api/get_competitor_suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      
+      const data = await response.json();
+      setCompetitorData(data.industry_tables || []);
+    } catch (error) {
+      console.error("API error:", error);
+      setCompetitorData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Convert file to base64 for JSON POST
@@ -343,6 +354,7 @@ export default function App() {
     setExternalSummary("");
     setUserData(null);
     setCompetitorData([]);
+    setHasAttemptedCompetitorSearch(true); // Set flag when user attempts to get summary
 
     try {
           const naicsCodeValue = naicsCode;
@@ -747,6 +759,34 @@ export default function App() {
             <p style={{ fontSize: '0.8em', color: '#B8860B', marginTop: '0.5em' }}>
               Fastest way to upload multiple reports
             </p>
+            
+            {/* Show uploaded file names */}
+            {uploadedFileNames.length > 0 && (
+              <div style={{ marginTop: '1em', padding: '1em', backgroundColor: '#f0f8f0', borderRadius: '5px', border: '1px solid #4CAF50' }}>
+                <h5 style={{ color: '#2E7D32', marginBottom: '0.5em' }}>Uploaded Files:</h5>
+                <ul style={{ margin: 0, paddingLeft: '1.5em', color: '#2E7D32' }}>
+                  {uploadedFileNames.map((fileName, index) => (
+                    <li key={index} style={{ fontSize: '0.9em', marginBottom: '0.25em' }}>
+                      {fileName}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Show any errors */}
+            {Object.keys(uploadError).length > 0 && (
+              <div style={{ marginTop: '1em', padding: '1em', backgroundColor: '#fff5f5', borderRadius: '5px', border: '1px solid #f44336' }}>
+                <h5 style={{ color: '#d32f2f', marginBottom: '0.5em' }}>Invalid Files:</h5>
+                <ul style={{ margin: 0, paddingLeft: '1.5em', color: '#d32f2f' }}>
+                  {Object.entries(uploadError).map(([fileName, error]) => (
+                    <li key={fileName} style={{ fontSize: '0.9em', marginBottom: '0.25em' }}>
+                      {fileName}: {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Individual File Uploads */}
@@ -1049,8 +1089,6 @@ export default function App() {
         Edit Client Data
       </button>
 
-
-
       {inputStep === "industryOrNaics" && (
         <>
           <div style={{ 
@@ -1189,10 +1227,25 @@ export default function App() {
                 minWidth: '200px',
                 padding: '12px 24px',
                 fontSize: '16px',
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                marginRight: '1em'
               }}
             >
               {loading ? "Analyzing..." : "Get Report Summary"}
+            </button>
+            
+            <button
+              className="secondary-btn"
+              onClick={handleGetCompetitorSuggestions}
+              disabled={loading}
+              style={{
+                minWidth: '200px',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: 'bold'
+              }}
+            >
+              {loading ? "Analyzing..." : "Get Competitor Data"}
             </button>
           </div>
         </>
@@ -1241,7 +1294,7 @@ export default function App() {
         </div>
       )}
 
-      {competitorData.length > 0 && (
+      {competitorData.length > 0 ? (
         <div className="form-group">
           <h2>Competitor Data:</h2>
           {competitorData.map((entry, i) => (
@@ -1256,7 +1309,47 @@ export default function App() {
             </div>
           ))}
         </div>
-      )}
+      ) : hasAttemptedCompetitorSearch ? (
+        <div className="form-group" style={{ textAlign: 'center', padding: '2em', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
+          <h3 style={{ color: '#6c757d', marginBottom: '1em' }}>No Competitor Data Found</h3>
+          <p style={{ color: '#6c757d', marginBottom: '1.5em' }}>
+            No publicly available companies were found in your industry matching those keywords at this time.
+          </p>
+          <div style={{ display: 'flex', gap: '1em', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              className="secondary-btn"
+              onClick={handleGetCompetitorSuggestions}
+              disabled={loading}
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              {loading ? "Searching..." : "Check Again"}
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={() => setShowClientDataModal(true)}
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Change Keywords
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {fredData && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
       {trendData && renderTimeSeriesTables(trendData, "Google Search Trends")}
@@ -1266,4 +1359,4 @@ export default function App() {
       <img src={process.env.PUBLIC_URL + "/jirav.svg"} alt="Jirav logo" className="footer-logo" />
     </div>
   );
-}  
+}
