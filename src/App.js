@@ -53,7 +53,6 @@ export default function App() {
   const [inputStep, setInputStep] = useState("industryOrNaics");
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
-  const [hasAttemptedCompetitorSearch, setHasAttemptedCompetitorSearch] = useState(false);
   
   // File upload states for client data modal
   const [uploadedFiles, setUploadedFiles] = useState({
@@ -139,38 +138,6 @@ export default function App() {
     
     setUploadedFileNames(validFiles);
     setUploadError(newUploadErrors);
-  };
-
-  // New function to get competitor data suggestions
-  const handleGetCompetitorSuggestions = async () => {
-    setLoading(true);
-    setHasAttemptedCompetitorSearch(true); // Mark that competitor search has been attempted
-    
-    try {
-      const naicsCodeValue = naicsCode;
-      const body = {
-        naics_code: parseInt(naicsCodeValue),
-        keywords: keywords.trim() || undefined
-      };
-      
-      const response = await fetch('/api/get_competitor_suggestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-      
-      const data = await response.json();
-      setCompetitorData(data.industry_tables || []);
-    } catch (error) {
-      console.error("API error:", error);
-      setCompetitorData([]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Convert file to base64 for JSON POST
@@ -354,7 +321,6 @@ export default function App() {
     setExternalSummary("");
     setUserData(null);
     setCompetitorData([]);
-    setHasAttemptedCompetitorSearch(true); // Set flag when user attempts to get summary
 
     try {
           const naicsCodeValue = naicsCode;
@@ -1227,25 +1193,10 @@ export default function App() {
                 minWidth: '200px',
                 padding: '12px 24px',
                 fontSize: '16px',
-                fontWeight: 'bold',
-                marginRight: '1em'
-              }}
-            >
-              {loading ? "Analyzing..." : "Get Report Summary"}
-            </button>
-            
-            <button
-              className="secondary-btn"
-              onClick={handleGetCompetitorSuggestions}
-              disabled={loading}
-              style={{
-                minWidth: '200px',
-                padding: '12px 24px',
-                fontSize: '16px',
                 fontWeight: 'bold'
               }}
             >
-              {loading ? "Analyzing..." : "Get Competitor Data"}
+              {loading ? "Analyzing..." : "Get Report Summary"}
             </button>
           </div>
         </>
@@ -1294,7 +1245,7 @@ export default function App() {
         </div>
       )}
 
-      {competitorData.length > 0 ? (
+      {competitorData.length > 0 && (
         <div className="form-group">
           <h2>Competitor Data:</h2>
           {competitorData.map((entry, i) => (
@@ -1309,47 +1260,7 @@ export default function App() {
             </div>
           ))}
         </div>
-      ) : hasAttemptedCompetitorSearch ? (
-        <div className="form-group" style={{ textAlign: 'center', padding: '2em', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-          <h3 style={{ color: '#6c757d', marginBottom: '1em' }}>No Competitor Data Found</h3>
-          <p style={{ color: '#6c757d', marginBottom: '1.5em' }}>
-            No publicly available companies were found in your industry matching those keywords at this time.
-          </p>
-          <div style={{ display: 'flex', gap: '1em', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              className="secondary-btn"
-              onClick={handleGetCompetitorSuggestions}
-              disabled={loading}
-              style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
-            >
-              {loading ? "Searching..." : "Check Again"}
-            </button>
-            <button
-              className="secondary-btn"
-              onClick={() => setShowClientDataModal(true)}
-              style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
-            >
-              Change Keywords
-            </button>
-          </div>
-        </div>
-      ) : null}
+      )}
 
       {fredData && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
       {trendData && renderTimeSeriesTables(trendData, "Google Search Trends")}
