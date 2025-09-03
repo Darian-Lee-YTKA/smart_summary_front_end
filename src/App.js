@@ -385,12 +385,25 @@ export default function App() {
     return headerMap[header.toLowerCase()] || formatHeader(header);
   };
 
-  const formatNumber = (value) => {
+  const formatNumber = (value, columnName = null) => {
     if (typeof value === 'number') {
-      return value.toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-      });
+      // Check if this is a year column - years are typically 4-digit numbers
+      const isYearColumn = columnName && (
+        columnName.toLowerCase() === 'year' || 
+        columnName.toLowerCase().includes('year') ||
+        (value >= 1900 && value <= 2100 && Number.isInteger(value))
+      );
+      
+      if (isYearColumn) {
+        // For year columns, don't add commas
+        return value.toString();
+      } else {
+        // For other numeric values, use locale formatting with commas
+        return value.toLocaleString('en-US', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        });
+      }
     }
     return value;
   };
@@ -434,7 +447,7 @@ export default function App() {
                 {filteredData.map((entry, i) => (
                   <tr key={i}>
                     <td>{new Date(entry.date).toISOString().split("T")[0]}</td>
-                    <td>{formatNumber(entry[key] ?? entry.value ?? "N/A")}</td>
+                    <td>{formatNumber(entry[key] ?? entry.value ?? "N/A", key)}</td>
                   </tr>
                 ))}
                 </tbody>
@@ -490,7 +503,7 @@ export default function App() {
             {filteredData.map((row, idx) => (
               <tr key={idx}>
                 {columns.map((col) => (
-                  <td key={col}>{formatNumber(row[col])}</td>
+                  <td key={col}>{formatNumber(row[col], col)}</td>
                 ))}
               </tr>
             ))}
