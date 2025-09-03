@@ -62,9 +62,11 @@ export default function App() {
     balance_sheet: null,
     cash_flow: null,
     finance_record: null,
-    workforce: null
+    workforce: null,
+    forecasted_executive_summary: null
   });
   const [uploadError, setUploadError] = useState({});
+  const [folderUploadMode, setFolderUploadMode] = useState(false);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -103,6 +105,61 @@ export default function App() {
         setUploadedFiles(prev => ({ ...prev, [reportType]: null }));
       }
     }
+  };
+
+  // New function to handle folder upload
+  const handleFolderUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const newUploadedFiles = { ...uploadedFiles };
+    const newUploadErrors = { ...uploadError };
+    
+    // Clear previous errors
+    Object.keys(newUploadErrors).forEach(key => {
+      newUploadErrors[key] = "";
+    });
+    
+    files.forEach(file => {
+      const allowedTypes = [
+        'text/csv',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ];
+      
+      if (allowedTypes.includes(file.type) || file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // Try to match file name to report type
+        const fileName = file.name.toLowerCase();
+        let reportType = null;
+        
+        if (fileName.includes('executive') && fileName.includes('summary')) {
+          if (fileName.includes('forecast')) {
+            reportType = 'forecasted_executive_summary';
+          } else {
+            reportType = 'executive_summary';
+          }
+        } else if (fileName.includes('income') && fileName.includes('department')) {
+          reportType = 'income_statement_by_department';
+        } else if (fileName.includes('income') && (fileName.includes('yoy') || fileName.includes('year'))) {
+          reportType = 'income_statement_yoy';
+        } else if (fileName.includes('balance') || fileName.includes('balance_sheet')) {
+          reportType = 'balance_sheet';
+        } else if (fileName.includes('cash') && fileName.includes('flow')) {
+          reportType = 'cash_flow';
+        } else if (fileName.includes('finance') || fileName.includes('budget')) {
+          reportType = 'finance_record';
+        } else if (fileName.includes('workforce') || fileName.includes('employee') || fileName.includes('personnel')) {
+          reportType = 'workforce';
+        }
+        
+        if (reportType) {
+          newUploadedFiles[reportType] = file;
+        }
+      } else {
+        newUploadErrors[file.name] = "Please upload a CSV or Excel file (.csv, .xlsx, .xls)";
+      }
+    });
+    
+    setUploadedFiles(newUploadedFiles);
+    setUploadError(newUploadErrors);
   };
 
   // Convert file to base64 for JSON POST
@@ -668,172 +725,219 @@ export default function App() {
             Upload your financial reports to get automatic analysis and insights
           </p>
 
-          {/* Executive Summary */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>📈 Executive Summary</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Monthly revenue, cash balance, and net income data
+          {/* Folder Upload Option - RECOMMENDED */}
+          <div style={{ marginBottom: '2em', padding: '1.5em', border: '2px solid #4CAF50', borderRadius: '8px', backgroundColor: '#f8fff8' }}>
+            <h4>🚀 Quick Upload (Recommended)</h4>
+            <p style={{ fontSize: '0.9em', color: '#2E7D32', marginBottom: '0.5em', fontWeight: 'bold' }}>
+              Upload all your files at once - they'll be automatically identified by content
             </p>
             <input
               type="file"
+              multiple
               accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('executive_summary', e)}
+              onChange={handleFolderUpload}
               style={{ marginBottom: '0.5em' }}
             />
-            {uploadedFiles.executive_summary && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.executive_summary.name}
-              </div>
-            )}
-            {uploadError.executive_summary && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.executive_summary}
-              </div>
-            )}
+            <p style={{ fontSize: '0.8em', color: '#4CAF50', marginTop: '0.5em' }}>
+              ⚡ Fastest way to upload multiple reports
+            </p>
           </div>
 
-          {/* Income Statement by Department */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>💰 Income Statement by Department</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Revenue, COGS, operating expenses by department
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('income_statement_by_department', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.income_statement_by_department && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.income_statement_by_department.name}
-              </div>
-            )}
-            {uploadError.income_statement_by_department && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.income_statement_by_department}
-              </div>
-            )}
-          </div>
+          {/* Individual File Uploads */}
+          <div style={{ marginTop: '1em', padding: '1em', border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
+            <h4 style={{ color: '#666', marginBottom: '0.5em' }}>📄 Or upload files individually:</h4>
 
-          {/* Income Statement YoY */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>📊 Income Statement Year-over-Year</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Current vs prior year revenue, net income, and gross margin
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('income_statement_yoy', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.income_statement_yoy && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.income_statement_yoy.name}
-              </div>
-            )}
-            {uploadError.income_statement_yoy && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.income_statement_yoy}
-              </div>
-            )}
-          </div>
+            {/* Executive Summary */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>📈 Executive Summary</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Monthly revenue, cash balance, and net income data
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('executive_summary', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.executive_summary && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.executive_summary.name}
+                </div>
+              )}
+              {uploadError.executive_summary && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.executive_summary}
+                </div>
+              )}
+            </div>
 
-          {/* Balance Sheet */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>⚖️ Balance Sheet</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Assets, liabilities, and equity breakdown
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('balance_sheet', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.balance_sheet && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.balance_sheet.name}
-              </div>
-            )}
-            {uploadError.balance_sheet && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.balance_sheet}
-              </div>
-            )}
-          </div>
+            {/* Income Statement by Department */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>💰 Income Statement by Department</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Revenue, COGS, operating expenses by department
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('income_statement_by_department', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.income_statement_by_department && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.income_statement_by_department.name}
+                </div>
+              )}
+              {uploadError.income_statement_by_department && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.income_statement_by_department}
+                </div>
+              )}
+            </div>
 
-          {/* Cash Flow */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>💸 Cash Flow Statement</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Operating, investing, and financing cash flows
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('cash_flow', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.cash_flow && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.cash_flow.name}
-              </div>
-            )}
-            {uploadError.cash_flow && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.cash_flow}
-              </div>
-            )}
-          </div>
+            {/* Income Statement YoY */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>📊 Income Statement Year-over-Year</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Current vs prior year revenue, net income, and gross margin
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('income_statement_yoy', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.income_statement_yoy && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.income_statement_yoy.name}
+                </div>
+              )}
+              {uploadError.income_statement_yoy && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.income_statement_yoy}
+                </div>
+              )}
+            </div>
 
-          {/* Finance Record (Budget vs Actuals) */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>📋 Finance Record (Budget vs Actuals)</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Budget vs actual cost variances and anomalies
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('finance_record', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.finance_record && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.finance_record.name}
-              </div>
-            )}
-            {uploadError.finance_record && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.finance_record}
-              </div>
-            )}
-          </div>
+            {/* Balance Sheet */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>⚖️ Balance Sheet</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Assets, liabilities, and equity breakdown
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('balance_sheet', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.balance_sheet && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.balance_sheet.name}
+                </div>
+              )}
+              {uploadError.balance_sheet && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.balance_sheet}
+                </div>
+              )}
+            </div>
 
-          {/* Workforce */}
-          <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-            <h4>👥 Workforce</h4>
-            <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-              Employee count, turnover, and personnel costs
-            </p>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={(e) => handleFileUpload('workforce', e)}
-              style={{ marginBottom: '0.5em' }}
-            />
-            {uploadedFiles.workforce && (
-              <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                ✅ {uploadedFiles.workforce.name}
-              </div>
-            )}
-            {uploadError.workforce && (
-              <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                ❌ {uploadError.workforce}
-              </div>
-            )}
+            {/* Cash Flow */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>💸 Cash Flow Statement</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Operating, investing, and financing cash flows
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('cash_flow', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.cash_flow && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.cash_flow.name}
+                </div>
+              )}
+              {uploadError.cash_flow && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.cash_flow}
+                </div>
+              )}
+            </div>
+
+            {/* Finance Record (Budget vs Actuals) */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>📋 Finance Record (Budget vs Actuals)</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Budget vs actual cost variances and anomalies
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('finance_record', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.finance_record && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.finance_record.name}
+                </div>
+              )}
+              {uploadError.finance_record && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.finance_record}
+                </div>
+              )}
+            </div>
+
+            {/* Workforce */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>👥 Workforce</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Employee count, turnover, and personnel costs
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('workforce', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.workforce && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.workforce.name}
+                </div>
+              )}
+              {uploadError.workforce && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.workforce}
+                </div>
+              )}
+            </div>
+
+            {/* Forecasted Executive Summary */}
+            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
+              <h4>🔮 Forecasted Executive Summary</h4>
+              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
+                Projected revenue, cash balance, and net income data for future periods
+              </p>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => handleFileUpload('forecasted_executive_summary', e)}
+                style={{ marginBottom: '0.5em' }}
+              />
+              {uploadedFiles.forecasted_executive_summary && (
+                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
+                  ✅ {uploadedFiles.forecasted_executive_summary.name}
+                </div>
+              )}
+              {uploadError.forecasted_executive_summary && (
+                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
+                  ❌ {uploadError.forecasted_executive_summary}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
