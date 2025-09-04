@@ -76,6 +76,9 @@ export default function App() {
   const [folderUploadMode, setFolderUploadMode] = useState(false);
   const [uploadedFileNames, setUploadedFileNames] = useState([]);
 
+  // Add this new state variable near the top with other state variables (around line 54)
+  const [manualCikInput, setManualCikInput] = useState("");
+
   // Load saved data from Clerk (if signed in) on mount or when user changes
   useEffect(() => {
     const load = async () => {
@@ -99,6 +102,26 @@ export default function App() {
         if (meta.keywords) {
           console.log("Loading keywords:", meta.keywords);
           setKeywords(String(meta.keywords));
+        }
+        if (meta.cikInputs) {
+          console.log("Loading cikInputs:", meta.cikInputs);
+          setCikInputs(JSON.parse(meta.cikInputs));
+          // Set the manual CIK input to show manually entered CIKs
+          const loadedCiks = JSON.parse(meta.cikInputs);
+          const manualCiks = loadedCiks.filter(c => c.name === null).map(c => c.cik).join(', ');
+          setManualCikInput(manualCiks);
+        }
+        if (meta.userOpinion) {
+          console.log("Loading userOpinion:", meta.userOpinion);
+          setUserOpinion(String(meta.userOpinion));
+        }
+        if (meta.expertName) {
+          console.log("Loading expertName:", meta.expertName);
+          setExpertName(String(meta.expertName));
+        }
+        if (meta.selectedIndicators) {
+          console.log("Loading selectedIndicators:", meta.selectedIndicators);
+          setSelectedIndicators(JSON.parse(meta.selectedIndicators));
         }
       }
     };
@@ -212,24 +235,35 @@ export default function App() {
 
   const handleCompanyNameChange = (value) => {
     setCompanyName(value);
-    saveToProfile('companyName', value);
   };
 
   const handleNaicsCodeChange = (value) => {
     setNaicsCode(value);
-    saveToProfile('naicsCode', value);
   };
 
   const handleSelectedStateChange = (value) => {
     setSelectedState(value);
-    saveToProfile('selectedState', value);
   };
 
   const handleKeywordsChange = (value) => {
     setKeywords(value);
-    saveToProfile('keywords', value);
   };
 
+  const handleCikInputsChange = (value) => {
+    setCikInputs(value);
+  };
+
+  const handleUserOpinionChange = (value) => {
+    setUserOpinion(value);
+  };
+
+  const handleExpertNameChange = (value) => {
+    setExpertName(value);
+  };
+
+  const handleSelectedIndicatorsChange = (value) => {
+    setSelectedIndicators(value);
+  };
 
 
   const promptFormatOptions = [
@@ -675,10 +709,12 @@ export default function App() {
         backgroundColor: 'white',
         padding: '2em',
         borderRadius: '8px',
-        maxWidth: '800px',
-        width: '90%',
+        width: '95%',
+        maxWidth: '1200px',
         maxHeight: '90vh',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <h2>Edit Client Data</h2>
         
@@ -732,8 +768,6 @@ export default function App() {
               placeholder="e.g. dog grooming, cloud computing"
             />
           </div>
-
-
         </div>
 
         {/* Financial Reports Upload */}
@@ -751,7 +785,7 @@ export default function App() {
             borderRadius: '8px', 
             backgroundColor: '#fffbf0' 
           }}>
-            <h4 style={{ color: '#B8860B', marginBottom: '0.5em' }}>Quick Upload (Recommended)</h4>
+            <h4 style={{ color: '#B8860B', marginBottom: '0.5em' }}>Upload Financial Reports</h4>
             <p style={{ fontSize: '0.9em', color: '#B8860B', marginBottom: '0.5em', fontWeight: 'bold' }}>
               Upload all your files at once - they'll be automatically identified by content
             </p>
@@ -763,7 +797,7 @@ export default function App() {
               style={{ marginBottom: '0.5em' }}
             />
             <p style={{ fontSize: '0.8em', color: '#B8860B', marginTop: '0.5em' }}>
-              Fastest way to upload multiple reports
+              Supported file types: CSV, Excel (.xlsx, .xls)
             </p>
             
             {/* Show uploaded file names */}
@@ -794,223 +828,200 @@ export default function App() {
               </div>
             )}
           </div>
-
-          {/* Individual File Uploads */}
-          <div style={{ 
-            marginTop: '1em', 
-            padding: '1em', 
-            border: '1px solid #ddd', 
-            borderRadius: '8px', 
-            backgroundColor: '#f9f9f9' 
-          }}>
-            <h4 style={{ color: '#666', marginBottom: '0.5em' }}>Or upload files individually:</h4>
-
-            {/* Executive Summary */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Executive Summary</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Monthly revenue, cash balance, and net income data
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('executive_summary', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.executive_summary && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.executive_summary.name}
-                </div>
-              )}
-              {uploadError.executive_summary && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.executive_summary}
-                </div>
-              )}
-            </div>
-
-            {/* Income Statement by Department */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Income Statement by Department</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Revenue, COGS, operating expenses by department
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('income_statement_by_department', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.income_statement_by_department && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.income_statement_by_department.name}
-                </div>
-              )}
-              {uploadError.income_statement_by_department && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.income_statement_by_department}
-                </div>
-              )}
-            </div>
-
-            {/* Income Statement YoY */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Income Statement Year-over-Year</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Current vs prior year revenue, net income, and gross margin
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('income_statement_yoy', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.income_statement_yoy && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.income_statement_yoy.name}
-                </div>
-              )}
-              {uploadError.income_statement_yoy && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.income_statement_yoy}
-                </div>
-              )}
-            </div>
-
-            {/* Balance Sheet */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Balance Sheet</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Assets, liabilities, and equity breakdown
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('balance_sheet', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.balance_sheet && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.balance_sheet.name}
-                </div>
-              )}
-              {uploadError.balance_sheet && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.balance_sheet}
-                </div>
-              )}
-            </div>
-
-            {/* Cash Flow */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Cash Flow Statement</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Operating, investing, and financing cash flows
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('cash_flow', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.cash_flow && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.cash_flow.name}
-                </div>
-              )}
-              {uploadError.cash_flow && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.cash_flow}
-                </div>
-              )}
-            </div>
-
-            {/* Finance Record (Budget vs Actuals) */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Finance Record (Budget vs Actuals)</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Budget vs actual cost variances and anomalies
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('finance_record', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.finance_record && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.finance_record.name}
-                </div>
-              )}
-              {uploadError.finance_record && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.finance_record}
-                </div>
-              )}
-            </div>
-
-            {/* Workforce */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Workforce</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Employee count, turnover, and personnel costs
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('workforce', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.workforce && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.workforce.name}
-                </div>
-              )}
-              {uploadError.workforce && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.workforce}
-                </div>
-              )}
-            </div>
-
-            {/* Forecasted Executive Summary */}
-            <div style={{ marginBottom: '1em', padding: '1em', border: '1px solid #eee', borderRadius: '5px' }}>
-              <h4>Forecasted Executive Summary</h4>
-              <p style={{ fontSize: '0.8em', color: '#666', marginBottom: '0.5em' }}>
-                Projected revenue, cash balance, and net income data for future periods
-              </p>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => handleFileUpload('forecasted_executive_summary', e)}
-                style={{ marginBottom: '0.5em' }}
-              />
-              {uploadedFiles.forecasted_executive_summary && (
-                <div style={{ fontSize: '0.9em', color: '#4CAF50', marginBottom: '0.5em' }}>
-                  ✅ {uploadedFiles.forecasted_executive_summary.name}
-                </div>
-              )}
-              {uploadError.forecasted_executive_summary && (
-                <div style={{ fontSize: '0.9em', color: '#f44336', marginBottom: '0.5em' }}>
-                  ❌ {uploadError.forecasted_executive_summary}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1em', marginTop: '1em' }}>
+        {/* CIK Suggestions Section */}
+        <div style={{ marginBottom: '2em', padding: '1em', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <h3>Competitor CIK Numbers</h3>
+          
+          {/* Saved CIKs Section */}
+          {cikInputs.length > 0 && (
+            <div style={{ marginBottom: '2em', padding: '1em', border: '1px solid #4CAF50', borderRadius: '8px', backgroundColor: '#f0f8f0' }}>
+              <h4 style={{ color: '#2E7D32', marginBottom: '0.5em' }}>Saved CIKs</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5em', marginBottom: '1em' }}>
+                {cikInputs.map((item, i) => (
+                  <div
+                    key={`saved-${item.cik}-${i}`}
+                    style={{
+                      padding: '0.5em 1em',
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      borderRadius: '20px',
+                      fontSize: '0.9em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5em'
+                    }}
+                  >
+                    <span>
+                      {item.name ? `${item.name} (CIK: ${item.cik})` : `CIK: ${item.cik}`}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setCikInputs(prev => prev.filter((_, index) => index !== i));
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '1.2em',
+                        padding: '0',
+                        marginLeft: '0.5em'
+                      }}
+                      title="Remove this CIK"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label>Get CIK Suggestions:</label>
+            <button
+              className="secondary-btn"
+              onClick={async () => {
+                if (!naicsCode) {
+                  alert("Please enter a NAICS code first");
+                  return;
+                }
+                
+                const params = new URLSearchParams({ naics_code: naicsCode });
+                if (selectedState) params.append("state", selectedState);
+                if (keywords) params.append("key_words", keywords);
+
+                try {
+                  const response = await fetch(`https://external-data-backend.onrender.com/add_company_data/?${params.toString()}`);
+                  const data = await response.json();
+                  setSuggestedCompanies(data);
+                } catch (error) {
+                  console.error("Error fetching CIK suggestions:", error);
+                }
+              }}
+              disabled={!naicsCode}
+            >
+              Get Competitor Suggestions
+            </button>
+          </div>
+
+          {suggestedCompanies.length > 0 && (
+            <div className="form-group">
+              <label>Suggested Companies:</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5em', marginBottom: '1em' }}>
+                {suggestedCompanies.map((item, i) => {
+                  const isSelected = cikInputs.some((c) => c.cik === item.cik && c.name === item.name);
+                  return (
+                    <button
+                      key={`${item.cik}-${item.name}-${i}`}
+                      className={`secondary-btn company-btn ${isSelected ? "selected" : ""}`}
+                      onClick={() => {
+                        console.log('Clicked company:', item.name, 'CIK:', item.cik);
+                        console.log('Current cikInputs:', cikInputs);
+                        
+                        setCikInputs((prev) => {
+                          const isCurrentlySelected = prev.some((c) => c.cik === item.cik && c.name === item.name);
+                          console.log('Is currently selected:', isCurrentlySelected);
+                          
+                          if (isCurrentlySelected) {
+                            // Remove this specific company
+                            const filtered = prev.filter((c) => !(c.cik === item.cik && c.name === item.name));
+                            console.log('Removed company, new list:', filtered);
+                            return filtered;
+                          } else {
+                            // Add this specific company
+                            const newList = [...prev, { name: item.name, cik: item.cik }];
+                            console.log('Added company, new list:', newList);
+                            return newList;
+                          }
+                        });
+                      }}
+                    >
+                      {item.name} (CIK: {item.cik}{item.state ? `, State: ${item.state}` : ""})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label>Add your own CIK numbers (comma separated):</label>
+            <input
+              type="text"
+              className="text-input"
+              placeholder="e.g. 0000320193, 0000789019"
+              value={manualCikInput}
+              onChange={(e) => {
+                setManualCikInput(e.target.value);
+                // Process the input and update cikInputs
+                const values = e.target.value.split(/,\s*/).filter(Boolean);
+                const objects = values.map((cik) => ({ name: null, cik }));
+                // Keep existing selected companies and add/update manual CIK inputs
+                const existingCompanies = cikInputs.filter(c => c.name !== null);
+                const newCikInputs = [...existingCompanies, ...objects];
+                handleCikInputsChange(newCikInputs);
+              }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Expert Opinion:</label>
+            <textarea
+              className="text-area"
+              value={userOpinion}
+              onChange={(e) => handleUserOpinionChange(e.target.value)}
+              placeholder="e.g. I'm concerned about seasonal fluctuations, or I think demand will increase due to a new local law."
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Expert Name:</label>
+            <input
+              type="text"
+              className="text-input"
+              placeholder="e.g. John Smith, Your Company"
+              value={expertName}
+              onChange={(e) => handleExpertNameChange(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Economic Indicators:</label>
+            <EconomicIndicatorsBox
+              selectedIndicators={selectedIndicators}
+              setSelectedIndicators={handleSelectedIndicatorsChange}
+            />
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2em' }}>
           <button 
             className="primary-btn" 
-            onClick={() => setShowClientDataModal(false)}
+            onClick={async () => {
+              // Save all data when closing modal
+              if (isSignedIn && user) {
+                const current = user.unsafeMetadata || {};
+                const newMetadata = { 
+                  ...current, 
+                  companyName,
+                  naicsCode,
+                  selectedState,
+                  keywords,
+                  cikInputs: JSON.stringify(cikInputs),
+                  manualCikInput,
+                  userOpinion,
+                  expertName,
+                  selectedIndicators: JSON.stringify(selectedIndicators)
+                };
+                await user.update({ unsafeMetadata: newMetadata });
+              }
+              setShowClientDataModal(false);
+            }}
           >
             Save & Close
-          </button>
-          <button 
-            className="secondary-btn" 
-            onClick={() => setShowClientDataModal(false)}
-          >
-            Cancel
           </button>
         </div>
       </div>
@@ -1149,118 +1160,12 @@ export default function App() {
                   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                   transition: 'all 0.3s ease'
                 }}
-                            onClick={() => handleNaicsSubmit()}
+                            onClick={() => handleGetTrends()}
             disabled={!naicsCode}
               >
                 Get Report Summary 
               </button>
             </div>
-          </div>
-        </>
-      )}
-      
-      {inputStep === "selectCiks" && (
-        <>
-          {suggestedCompanies.length > 0 && (
-            <div className="form-group">
-              <h3>Suggested Companies:</h3>
-              {suggestedCompanies.map((item, i) => {
-                // Use both name and CIK for more precise matching
-                const isSelected = cikInputs.some((c) => c.cik === item.cik && c.name === item.name);
-                return (
-                  <button
-                    key={`${item.cik}-${item.name}-${i}`}
-                    className={`secondary-btn company-btn ${isSelected ? "selected" : ""}`}
-                    onClick={() => {
-                      console.log('Clicked company:', item.name, 'CIK:', item.cik);
-                      console.log('Current cikInputs:', cikInputs);
-                      
-                      setCikInputs((prev) => {
-                        const isCurrentlySelected = prev.some((c) => c.cik === item.cik && c.name === item.name);
-                        console.log('Is currently selected:', isCurrentlySelected);
-                        
-                        if (isCurrentlySelected) {
-                          // Remove this specific company
-                          const filtered = prev.filter((c) => !(c.cik === item.cik && c.name === item.name));
-                          console.log('Removed company, new list:', filtered);
-                          return filtered;
-                        } else {
-                          // Add this specific company
-                          const newList = [...prev, { name: item.name, cik: item.cik }];
-                          console.log('Added company, new list:', newList);
-                          return newList;
-                        }
-                      });
-                    }}
-                  >
-                    {item.name} (CIK: {item.cik}{item.state ? `, State: ${item.state}` : ""})
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="form-group">
-            <label>Add your own CIK numbers for competitors (comma separated):</label>
-            <input
-              type="text"
-              className="text-input"
-              placeholder="e.g. 0000320193, 0000789019"
-              onChange={(e) => {
-                const values = e.target.value.split(/,\s*/).filter(Boolean);
-                const objects = values.map((cik) => ({ name: null, cik }));
-                setCikInputs(objects);
-              }}
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="user-opinion">Optional: Share your own insights or concerns about your business</label>
-            <textarea
-              id="user-opinion"
-              className="text-area"
-              value={userOpinion}
-              onChange={(e) => setUserOpinion(e.target.value)}
-              placeholder="e.g. I'm concerned about seasonal fluctuations, or I think demand will increase due to a new local law."
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="expert-name">Optional: Expert Name</label>
-            <input
-              id="expert-name"
-              type="text"
-              className="text-input"
-              placeholder="e.g. John Smith, Your Company"
-              value={expertName}
-              onChange={(e) => setExpertName(e.target.value)}
-            />
-            <EconomicIndicatorsBox
-              selectedIndicators={selectedIndicators}
-              setSelectedIndicators={setSelectedIndicators}
-            />
-          </div>
-
-          <div className="form-group">
-            <button className="secondary-btn" onClick={() => setCikInputs([])}>
-              Skip (no CIKs)
-            </button>
-          </div>
-
-          <div className="form-group" style={{ textAlign: 'center' }}>
-            <button
-              className="primary-btn"
-              onClick={handleGetTrends}
-              disabled={loading}
-              style={{
-                minWidth: '200px',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}
-            >
-              {loading ? "Analyzing..." : "Get Report Summary"}
-            </button>
           </div>
         </>
       )}
