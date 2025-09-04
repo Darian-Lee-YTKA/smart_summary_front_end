@@ -391,23 +391,39 @@ export default function App() {
   };
   
   const handleGetTrends = async () => {
-    // Check if client data is completely empty
-    const isClientDataEmpty = !companyName && !naicsCode && !selectedState && !keywords;
+    console.log('handleGetTrends called!');
+    console.log('companyName:', companyName);
+    console.log('naicsCode:', naicsCode);
+    console.log('selectedState:', selectedState);
+    console.log('keywords:', keywords);
+    console.log('uploadedFiles:', uploadedFiles);
+    
+    // Check if client data is completely empty - handle undefined, null, and empty strings
+    const isClientDataEmpty = (!companyName || companyName.trim() === '') && 
+                             (!naicsCode || naicsCode.trim() === '') && 
+                             (!selectedState || selectedState.trim() === '') && 
+                             (!keywords || keywords.trim() === '');
+    console.log('isClientDataEmpty:', isClientDataEmpty);
     
     // Check if financial data is missing
     const uploadedFilesList = Object.values(uploadedFiles).filter(file => file !== null);
     const isFinancialDataMissing = uploadedFilesList.length === 0;
+    console.log('uploadedFilesList:', uploadedFilesList);
+    console.log('isFinancialDataMissing:', isFinancialDataMissing);
 
     if (isClientDataEmpty) {
+      console.log('Showing client data empty alert');
       alert('Please update your client information in the "Edit Client Data" section before generating a report summary.');
       return;
     }
 
     if (isFinancialDataMissing) {
+      console.log('Showing financial data missing alert');
       alert('Please upload at least one financial report before generating a report summary.');
       return;
     }
 
+    console.log('Validation passed, proceeding with API call');
     setLoading(true);
     setExternalSummary("");
     setUserData(null);
