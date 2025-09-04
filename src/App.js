@@ -77,11 +77,26 @@ export default function App() {
   useEffect(() => {
     const load = async () => {
       if (isSignedIn && user) {
+        console.log("Loading user data from Clerk...");
+        console.log("User publicMetadata:", user.publicMetadata);
+        
         const meta = user.publicMetadata || {};
-        if (meta.companyName) setCompanyName(String(meta.companyName));
-        if (meta.naicsCode) setNaicsCode(String(meta.naicsCode));
-        if (meta.selectedState) setSelectedState(String(meta.selectedState));
-        if (meta.keywords) setKeywords(String(meta.keywords));
+        if (meta.companyName) {
+          console.log("Loading companyName:", meta.companyName);
+          setCompanyName(String(meta.companyName));
+        }
+        if (meta.naicsCode) {
+          console.log("Loading naicsCode:", meta.naicsCode);
+          setNaicsCode(String(meta.naicsCode));
+        }
+        if (meta.selectedState) {
+          console.log("Loading selectedState:", meta.selectedState);
+          setSelectedState(String(meta.selectedState));
+        }
+        if (meta.keywords) {
+          console.log("Loading keywords:", meta.keywords);
+          setKeywords(String(meta.keywords));
+        }
       }
     };
     load();
@@ -91,8 +106,13 @@ export default function App() {
   const saveToProfile = async (key, value) => {
     try {
       if (isSignedIn && user) {
+        console.log(`Saving ${key}:`, value);
         const current = user.publicMetadata || {};
-        await user.update({ publicMetadata: { ...current, [key]: value } });
+        const newMetadata = { ...current, [key]: value };
+        console.log("New metadata:", newMetadata);
+        
+        await user.update({ publicMetadata: newMetadata });
+        console.log("Successfully saved to Clerk");
       }
     } catch (e) {
       console.error("Failed to save to profile:", e);
