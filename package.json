@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@clerk/clerk-react": "^5.46.0",
+    "@clerk/nextjs": "^6.31.8",
     "plotly.js": "^2.27.0",
-    "react": "18.1.0",
-    "react-dom": "18.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-plotly.js": "2.6.0",
     "react-scripts": "5.0.1",
     "react-select": "^5.10.2",

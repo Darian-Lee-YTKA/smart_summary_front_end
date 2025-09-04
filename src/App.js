@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./style.css";
 import EconomicIndicatorsBox from "./EconomicIndicatorsBox";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 
 export default function App() {
+
+  const { isSignedIn, user } = useUser();
 
   const [editablePrompt, setEditablePrompt] = useState(`**Company Performance Analysis**
   Industry Overview
@@ -69,22 +72,30 @@ export default function App() {
   const [folderUploadMode, setFolderUploadMode] = useState(false);
   const [uploadedFileNames, setUploadedFileNames] = useState([]);
 
-  // Load saved data from localStorage on component mount
+  // Load saved data from Clerk (if signed in) on mount or when user changes
   useEffect(() => {
-    const savedCompanyName = localStorage.getItem('companyName');
-    const savedNaicsCode = localStorage.getItem('naicsCode');
-    const savedSelectedState = localStorage.getItem('selectedState');
-    const savedKeywords = localStorage.getItem('keywords');
+    const load = async () => {
+      if (isSignedIn && user) {
+        const meta = user.publicMetadata || {};
+        if (meta.companyName) setCompanyName(String(meta.companyName));
+        if (meta.naicsCode) setNaicsCode(String(meta.naicsCode));
+        if (meta.selectedState) setSelectedState(String(meta.selectedState));
+        if (meta.keywords) setKeywords(String(meta.keywords));
+      }
+    };
+    load();
+  }, [isSignedIn, user]);
 
-    if (savedCompanyName) setCompanyName(savedCompanyName);
-    if (savedNaicsCode) setNaicsCode(savedNaicsCode);
-    if (savedSelectedState) setSelectedState(savedSelectedState);
-    if (savedKeywords) setKeywords(savedKeywords);
-  }, []);
-
-  // Save data to localStorage whenever it changes
-  const saveToLocalStorage = (key, value) => {
-    localStorage.setItem(key, value);
+  // Save helpers
+  const saveToProfile = async (key, value) => {
+    try {
+      if (isSignedIn && user) {
+        const current = user.publicMetadata || {};
+        await user.update({ publicMetadata: { ...current, [key]: value } });
+      }
+    } catch (e) {
+      console.error("Failed to save to profile:", e);
+    }
   };
 
   // File upload handlers for client data modal
@@ -172,22 +183,22 @@ export default function App() {
 
   const handleCompanyNameChange = (value) => {
     setCompanyName(value);
-    saveToLocalStorage('companyName', value);
+    saveToProfile('companyName', value);
   };
 
   const handleNaicsCodeChange = (value) => {
     setNaicsCode(value);
-    saveToLocalStorage('naicsCode', value);
+    saveToProfile('naicsCode', value);
   };
 
   const handleSelectedStateChange = (value) => {
     setSelectedState(value);
-    saveToLocalStorage('selectedState', value);
+    saveToProfile('selectedState', value);
   };
 
   const handleKeywordsChange = (value) => {
     setKeywords(value);
-    saveToLocalStorage('keywords', value);
+    saveToProfile('keywords', value);
   };
 
 
@@ -977,6 +988,18 @@ export default function App() {
     </div>
   );
 
+  // Minimal auth header
+  const renderAuthHeader = () => (
+    <div className="form-group" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1em' }}>
+      <SignedOut>
+        <SignInButton />
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+    </div>
+  );
+
   if (view === "editPrompt") return renderEditFormat();
 
   if (view === "editPrompt") {
@@ -1036,7 +1059,7 @@ export default function App() {
       >
         Edit Report Format
       </button>
-
+ 
       <button
         style={{
           position: "absolute",
@@ -1045,7 +1068,6 @@ export default function App() {
           padding: "8px 12px",
           fontSize: "14px",
           backgroundColor: "#4CAF50",
-          color: "white",
           border: "1px solid #ccc",
           borderRadius: "5px",
           cursor: "pointer"
@@ -1054,6 +1076,8 @@ export default function App() {
       >
         Edit Client Data
       </button>
+
+      {renderAuthHeader()}
 
       {inputStep === "industryOrNaics" && (
         <>
