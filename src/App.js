@@ -78,9 +78,9 @@ export default function App() {
     const load = async () => {
       if (isSignedIn && user) {
         console.log("Loading user data from Clerk...");
-        console.log("User publicMetadata:", user.publicMetadata);
+        console.log("User unsafeMetadata:", user.unsafeMetadata);
         
-        const meta = user.publicMetadata || {};
+        const meta = user.unsafeMetadata || {};
         if (meta.companyName) {
           console.log("Loading companyName:", meta.companyName);
           setCompanyName(String(meta.companyName));
@@ -107,11 +107,11 @@ export default function App() {
     try {
       if (isSignedIn && user) {
         console.log(`Saving ${key}:`, value);
-        const current = user.publicMetadata || {};
+        const current = user.unsafeMetadata || {};
         const newMetadata = { ...current, [key]: value };
         console.log("New metadata:", newMetadata);
         
-        await user.update({ publicMetadata: newMetadata });
+        await user.update({ unsafeMetadata: newMetadata });
         console.log("Successfully saved to Clerk");
       }
     } catch (e) {
