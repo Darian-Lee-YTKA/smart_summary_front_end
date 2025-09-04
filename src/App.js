@@ -391,6 +391,23 @@ export default function App() {
   };
   
   const handleGetTrends = async () => {
+    // Check if client data is completely empty
+    const isClientDataEmpty = !companyName && !naicsCode && !selectedState && !keywords;
+    
+    // Check if financial data is missing
+    const uploadedFilesList = Object.values(uploadedFiles).filter(file => file !== null);
+    const isFinancialDataMissing = uploadedFilesList.length === 0;
+
+    if (isClientDataEmpty) {
+      alert('Please update your client information in the "Edit Client Data" section before generating a report summary.');
+      return;
+    }
+
+    if (isFinancialDataMissing) {
+      alert('Please upload at least one financial report before generating a report summary.');
+      return;
+    }
+
     setLoading(true);
     setExternalSummary("");
     setUserData(null);
