@@ -1174,50 +1174,6 @@ export default function App() {
         <div className="external-summary">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2>External Summary:</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={copyFormattedText}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                Copy Text
-              </button>
-              <button
-                onClick={exportToPDF}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                Export PDF
-              </button>
-              <button
-                onClick={exportToDOCX}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                Export DOCX
-              </button>
-            </div>
           </div>
           <div 
             id="summary-content"
