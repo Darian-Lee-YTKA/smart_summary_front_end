@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./style.css";
 import EconomicIndicatorsBox from "./EconomicIndicatorsBox";
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import ReactMarkdown from 'react-markdown';
 
 export default function App() {
 
@@ -119,10 +120,11 @@ export default function App() {
     }
   };
 
-  // Updated folder upload handler - just collect file names
+  // Updated folder upload handler - store file objects for backend processing
   const handleFolderUpload = (event) => {
     const files = Array.from(event.target.files);
     const newUploadErrors = { ...uploadError };
+    const newUploadedFiles = { ...uploadedFiles };
     
     // Clear previous errors
     Object.keys(newUploadErrors).forEach(key => {
@@ -141,6 +143,9 @@ export default function App() {
       
       if (allowedTypes.includes(file.type) || file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
         validFiles.push(file.name);
+        // Store the file object with a generic key since we don't know the specific report type
+        // The backend will identify the file type by content
+        newUploadedFiles[`folder_file_${file.name}`] = file;
       } else {
         invalidFiles.push(file.name);
         newUploadErrors[file.name] = "Please upload a CSV or Excel file (.csv, .xlsx, .xls)";
@@ -148,6 +153,7 @@ export default function App() {
     });
     
     setUploadedFileNames(validFiles);
+    setUploadedFiles(newUploadedFiles);
     setUploadError(newUploadErrors);
   };
 
@@ -1066,6 +1072,9 @@ export default function App() {
             </button>
           </SignInButton>
         </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
       </div>
 
       <button
@@ -1076,6 +1085,7 @@ export default function App() {
           padding: "8px 12px",
           fontSize: "14px",
           backgroundColor: "#4CAF50",
+          color: "white",
           border: "1px solid #ccc",
           borderRadius: "5px",
           cursor: "pointer"
@@ -1244,27 +1254,9 @@ export default function App() {
               lineHeight: '1.6',
               fontSize: '16px'
             }}
-            dangerouslySetInnerHTML={{
-              __html: externalSummary
-                .split(/\n+/)
-                .map((paragraph, idx) => {
-                  const trimmed = paragraph.trim();
-                  if (/^\*\*(.+)\*\*$/.test(trimmed)) {
-                    const header = trimmed.replace(/\*\*/g, "").trim();
-                    return `<h3 style="margin: 1.5em 0 0.5em 0; color: #333; font-size: 1.2em;">${header}</h3>`;
-                  }
-                  if (/^\* /.test(trimmed)) {
-                    return `<p style="margin: 0.5em 0; padding-left: 1.2em; text-indent: -1.2em;">• ${trimmed.slice(2)}</p>`;
-                  }
-                  if (trimmed.length > 0) {
-                    return `<p style="margin: 1em 0;">${trimmed}</p>`;
-                  }
-                  return '';
-                })
-                .join('')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            }}
-          />
+          >
+            <ReactMarkdown>{externalSummary}</ReactMarkdown>
+          </div>
         </div>
       )}
 
