@@ -46,7 +46,7 @@ export default function App() {
   const [naicsCode, setNaicsCode] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [keywords, setKeywords] = useState("");
-  const [companyName, setCompanyName] = useState("Jirav");
+  const [companyName, setCompanyName] = useState("");
   const [cikInputs, setCikInputs] = useState([]);
   const [suggestedCompanies, setSuggestedCompanies] = useState([]);
   const [externalSummary, setExternalSummary] = useState("");
@@ -1043,23 +1043,31 @@ export default function App() {
   
   return (
     <div className="App">
-      <button
+      <div
         style={{
           position: "absolute",
           top: "10px",
-          left: "10px",
-          padding: "8px 12px",
-          fontSize: "14px",
-          backgroundColor: "#FBC02D",
-          border: "1px solid #ccc",
-          borderRadius: "5px",
-          cursor: "pointer"
+          left: "10px"
         }}
-        onClick={() => setView("editPrompt")}
       >
-        Edit Report Format
-      </button>
- 
+        <SignedOut>
+          <SignInButton>
+            <button
+              style={{
+                padding: "8px 12px",
+                fontSize: "14px",
+                backgroundColor: "#FBC02D",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+                cursor: "pointer"
+              }}
+            >
+              Sign In
+            </button>
+          </SignInButton>
+        </SignedOut>
+      </div>
+
       <button
         style={{
           position: "absolute",
@@ -1076,8 +1084,6 @@ export default function App() {
       >
         Edit Client Data
       </button>
-
-      {renderAuthHeader()}
 
       {inputStep === "industryOrNaics" && (
         <>
