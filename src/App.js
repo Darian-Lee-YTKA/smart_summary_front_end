@@ -3,6 +3,9 @@ import "./style.css";
 import EconomicIndicatorsBox from "./EconomicIndicatorsBox";
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 import ReactMarkdown from 'react-markdown';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 
 export default function App() {
 
@@ -1264,8 +1267,55 @@ export default function App() {
       
       {externalSummary && (
         <div className="external-summary">
-          <h2>External Summary:</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2>External Summary:</h2>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={copyFormattedText}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Copy Text
+              </button>
+              <button
+                onClick={exportToPDF}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Export PDF
+              </button>
+              <button
+                onClick={exportToDOCX}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Export DOCX
+              </button>
+            </div>
+          </div>
           <div 
+            id="summary-content"
             style={{
               backgroundColor: '#f9f9f9',
               padding: '20px',
@@ -1313,3 +1363,131 @@ export default function App() {
     </div>
   );
 }
+
+// Export functions
+const exportToPDF = async () => {
+  const element = document.getElementById('summary-content');
+  if (!element) return;
+  
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const pageHeight = 295;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    
+    let position = 0;
+    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    pdf.save('summary-report.pdf');
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    alert('Error generating PDF. Please try again.');
+  }
+};
+
+const exportToDOCX = async () => {
+  try {
+    // Convert markdown to plain text for DOCX
+    const plainText = externalSummary
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic formatting
+      .replace(/#{1,6}\s/g, '') // Remove headers
+      .replace(/\n\n/g, '\n') // Clean up line breaks
+      .trim();
+    
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Company Performance Analysis Report",
+                bold: true,
+                size: 32
+              })
+            ],
+            heading: HeadingLevel.TITLE
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: plainText,
+                size: 24
+              })
+            ]
+          })
+        ]
+      }]
+    });
+    
+    const buffer = await Packer.toBuffer(doc);
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'summary-report.docx';
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error generating DOCX:', error);
+    alert('Error generating DOCX. Please try again.');
+  }
+};
+
+const copyFormattedText = async () => {
+  try {
+    // Convert markdown to HTML for better formatting when pasted
+    const htmlContent = externalSummary
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    
+    const fullHtml = `<p>${htmlContent}</p>`;
+    
+    // Create a temporary element to copy HTML
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = fullHtml;
+    document.body.appendChild(tempElement);
+    
+    // Select and copy
+    const range = document.createRange();
+    range.selectNodeContents(tempElement);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    document.execCommand('copy');
+    selection.removeAllRanges();
+    document.body.removeChild(tempElement);
+    
+    alert('Formatted text copied to clipboard!');
+  } catch (error) {
+    console.error('Error copying text:', error);
+    // Fallback to plain text
+    try {
+      await navigator.clipboard.writeText(externalSummary);
+      alert('Text copied to clipboard!');
+    } catch (fallbackError) {
+      alert('Error copying text. Please try again.');
+    }
+  }
+};
