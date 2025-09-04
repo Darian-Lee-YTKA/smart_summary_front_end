@@ -1170,10 +1170,79 @@ export default function App() {
         </>
       )}
       
+      {loading && (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2em',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '8px',
+          border: '1px solid #ddd',
+          marginBottom: '2em'
+        }}>
+          <p style={{ fontSize: '16px', color: '#666', margin: 0 }}>
+            Generating your industry analysis summary...
+          </p>
+        </div>
+      )}
+
       {externalSummary && (
         <div className="external-summary">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2>External Summary:</h2>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '20px',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}>
+            <h2 style={{ margin: 0, flex: 1, minWidth: '200px' }}>External Summary:</h2>
+            <button
+              onClick={async () => {
+                try {
+                  // Convert markdown to plain text for email with proper formatting
+                  const plainTextSummary = externalSummary
+                    .replace(/^#+\s*(.*)$/gm, '$1:') // Add colons after headers
+                    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+                    .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+                    .replace(/`(.*?)`/g, '$1') // Remove code markdown
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to just text
+                    .replace(/^[-*+]\s+(.*)$/gm, '\t- $1') // Convert bullet points with proper tab spacing
+                    .replace(/^\d+\.\s+(.*)$/gm, '\t$1') // Convert numbered lists with tab spacing
+                    .replace(/\n\n/g, '\n\n') // Keep paragraph breaks
+                    .replace(/\n/g, '\n') // Keep line breaks
+                    .trim();
+
+                  // Format the summary for plain text email
+                  const plainTextEmail = `Dear Team,
+
+Please find below the comprehensive industry analysis report:
+
+${plainTextSummary}
+
+Best regards,
+${expertName || 'Your Name'}`;
+
+                  await navigator.clipboard.writeText(plainTextEmail);
+                  alert('Email template copied to clipboard! Ready to paste into your email.');
+                } catch (err) {
+                  console.error('Failed to copy: ', err);
+                  alert('Failed to copy to clipboard. Please try again.');
+                }
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'hsl(17, 78%, 49%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                whiteSpace: 'nowrap',
+                height: 'fit-content'
+              }}
+            >
+              Copy Email Template
+            </button>
           </div>
           <div 
             id="summary-content"
