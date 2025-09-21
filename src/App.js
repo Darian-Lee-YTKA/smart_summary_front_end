@@ -61,6 +61,90 @@ export default function App() {
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
   
+  // NEW: Add table formats and tab state
+  const [tableFormats, setTableFormats] = useState([]);
+  const [currentTab, setCurrentTab] = useState("text"); // "text", "tables"
+  // Tab Navigation Component
+  const TabNavigation = () => (
+    <div className="tab-navigation">
+      <button 
+        className={`tab-button ${currentTab === "text" ? "active" : ""}`}
+        onClick={() => setCurrentTab("text")}
+      >
+        Text View
+      </button>
+      <button 
+        className={`tab-button ${currentTab === "tables" ? "active" : ""}`}
+        onClick={() => setCurrentTab("tables")}
+      >
+        Summarized Table View
+      </button>
+    </div>
+  );
+
+  // Table Display Component
+  const TableDisplay = ({ tableData }) => {
+    if (!tableData || !tableData.table_data) {
+      return <div>No table data available</div>;
+    }
+    
+    const { report_type, table_data } = tableData;
+    
+    // Handle different table data formats
+    let headers = [];
+    let rows = [];
+    
+    if (Array.isArray(table_data)) {
+      // Format 1: Array of objects (like Executive Summary, Balance Sheet, etc.)
+      if (table_data.length > 0) {
+        headers = Object.keys(table_data[0]);
+        rows = table_data.map(row => Object.values(row));
+      }
+    } else if (typeof table_data === 'object') {
+      // Format 2: Object with keys as headers and values as single row (like A/P, A/R)
+      const keys = Object.keys(table_data);
+      const values = Object.values(table_data);
+      
+      if (keys.length > 0 && values.length > 0) {
+        // Check if values are arrays (like {'Metrics': {'Total A/P'}, 'Values': {'5200.0'}})
+        if (Array.isArray(values[0])) {
+          headers = keys;
+          rows = [values.map(v => Array.isArray(v) ? v[0] : v)];
+        } else {
+          headers = keys;
+          rows = [values];
+        }
+      }
+    }
+    
+    if (headers.length === 0 || rows.length === 0) {
+      return <div>Invalid table data format</div>;
+    }
+    
+    return (
+      <div className="table-container">
+        <h4>{report_type ? report_type.replace(/_/g, ' ').toUpperCase() : 'Unknown Report'}</h4>
+        <table className="financial-table">
+          <thead>
+            <tr>
+              {headers.map((header, index) => (
+                <th key={index}>{header}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
   // File upload states for client data modal
   const [uploadedFiles, setUploadedFiles] = useState({
     executive_summary: null,
@@ -487,6 +571,7 @@ export default function App() {
       setCompetitorData(data.industry_tables);
       setFredData(data.fred_data);
       setTrendData(data.trends);
+      setTableFormats(data.table_formats || []); // ADD THIS LINE
     } catch (error) {
       console.error("API error:", error);
       setExternalSummary("Error retrieving summary from backend.");
@@ -1219,53 +1304,17 @@ export default function App() {
       )}
 
       {externalSummary && (
-        <div className="external-summary">
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '20px',
-            flexWrap: 'wrap',
-            gap: '10px'
-          }}>
-            <h2 style={{ margin: 0, flex: 1, minWidth: '200px' }}>External Summary:</h2>
+        <div className="summary-container">
+          <TabNavigation />
+          
+          {/* Add Copy Email Template button */}
+          <div style={{ marginBottom: '20px', textAlign: 'left' }}>
             <button
-              onClick={async () => {
-                try {
-                  // Convert markdown to plain text for email with proper formatting
-                  const plainTextSummary = externalSummary
-                    .replace(/^#+\s*(.*)$/gm, '$1:') // Add colons after headers
-                    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-                    .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-                    .replace(/`(.*?)`/g, '$1') // Remove code markdown
-                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to just text
-                    .replace(/^[-*+]\s+(.*)$/gm, '\t- $1') // Convert bullet points with proper tab spacing
-                    .replace(/^\d+\.\s+(.*)$/gm, '\t$1') // Convert numbered lists with tab spacing
-                    .replace(/\n\n/g, '\n\n') // Keep paragraph breaks
-                    .replace(/\n/g, '\n') // Keep line breaks
-                    .trim();
-
-                  // Format the summary for plain text email
-                  const plainTextEmail = `Dear Team,
-
-Please find below the comprehensive industry analysis report:
-
-${plainTextSummary}
-
-Best regards,
-${expertName || 'Your Name'}`;
-
-                  await navigator.clipboard.writeText(plainTextEmail);
-                  alert('Email template copied to clipboard! Ready to paste into your email.');
-                } catch (err) {
-                  console.error('Failed to copy: ', err);
-                  alert('Failed to copy to clipboard. Please try again.');
-                }
-              }}
+              onClick={copyFormattedText}
               style={{
                 padding: '8px 16px',
-                backgroundColor: 'hsl(17, 78%, 49%)',
-                color: 'white',
+                backgroundColor: 'hsl(17, 78%, 49%)', // Dark orange color
+                color: '#fff',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
@@ -1273,23 +1322,30 @@ ${expertName || 'Your Name'}`;
                 whiteSpace: 'nowrap',
                 height: 'fit-content'
               }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#eeb20ef3';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'hsl(17, 78%, 49%)';
+              }}
             >
               Copy Email Template
             </button>
           </div>
-          <div 
-            id="summary-content"
-            style={{
-              backgroundColor: '#f9f9f9',
-              padding: '20px',
-              borderRadius: '8px',
-              border: '1px solid #ddd',
-              lineHeight: '1.6',
-              fontSize: '16px'
-            }}
-          >
-            <ReactMarkdown>{externalSummary}</ReactMarkdown>
-          </div>
+          
+          {currentTab === "text" && (
+            <div className="text-view">
+              <ReactMarkdown>{externalSummary}</ReactMarkdown>
+            </div>
+          )}
+          
+          {currentTab === "tables" && (
+            <div className="tables-view">
+              {tableFormats.map((table, index) => (
+                <TableDisplay key={index} tableData={table} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1454,3 +1510,4 @@ const copyFormattedText = async () => {
     }
   }
 };
+
