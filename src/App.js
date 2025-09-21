@@ -53,9 +53,9 @@ export default function App() {
         <div style={{ lineHeight: '1.6', fontSize: '16px', textAlign: 'left' }}>
           <div style={{ marginBottom: '2em' }}>
             <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 1</h2>
-            <p>Download your default reports from Jirav in Excel or CSV format.</p>
-            <p style={{ fontStyle: 'italic', color: '#666', marginTop: '0.5em' }}>
-              (Note: This version only supports default report types. To learn how to export default reports in Jirav, watch the short video below.)
+            <p>Download your reports from Jirav in Excel or CSV format.</p>
+            <p style={{ backgroundColor: '#FFE4B5', padding: '8px 12px', borderRadius: '5px', color: '#666', marginTop: '0.5em' }}>
+              (Note: This version only supports <strong>default report types</strong>. To learn how to export these reports in Jirav, watch the short video below.)
             </p>
             <div style={{ marginTop: '1em', textAlign: 'center' }}>
               <img 
