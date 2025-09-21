@@ -233,6 +233,7 @@ export default function App() {
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
   const [showUserGuide, setShowUserGuide] = useState(false);
+  const [loadingCompetitorSuggestions, setLoadingCompetitorSuggestions] = useState(false);
   
   // NEW: Add table formats and tab state
   const [tableFormats, setTableFormats] = useState([]);
@@ -1187,6 +1188,7 @@ export default function App() {
                   return;
                 }
                 
+                setLoadingCompetitorSuggestions(true);
                 const params = new URLSearchParams({ naics_code: naicsCode });
                 if (selectedState) params.append("state", selectedState);
                 if (keywords) params.append("key_words", keywords);
@@ -1197,11 +1199,13 @@ export default function App() {
                   setSuggestedCompanies(data);
                 } catch (error) {
                   console.error("Error fetching CIK suggestions:", error);
+                } finally {
+                  setLoadingCompetitorSuggestions(false);
                 }
               }}
-              disabled={!naicsCode}
+              disabled={!naicsCode || loadingCompetitorSuggestions}
             >
-              Get Competitor Suggestions
+              {loadingCompetitorSuggestions ? "Loading..." : "Get Competitor Suggestions"}
             </button>
           </div>
 
