@@ -63,7 +63,8 @@ export default function App() {
   
   // NEW: Add table formats and tab state
   const [tableFormats, setTableFormats] = useState([]);
-  const [currentTab, setCurrentTab] = useState("text"); // "text", "tables"
+  const [currentTab, setCurrentTab] = useState("text"); // "text", "tables", "rawData"
+  
   // Tab Navigation Component
   const TabNavigation = () => (
     <div className="tab-navigation">
@@ -78,6 +79,12 @@ export default function App() {
         onClick={() => setCurrentTab("tables")}
       >
         Summarized Table View
+      </button>
+      <button 
+        className={`tab-button ${currentTab === "rawData" ? "active" : ""}`}
+        onClick={() => setCurrentTab("rawData")}
+      >
+        Raw Fetched Data
       </button>
     </div>
   );
@@ -1379,35 +1386,44 @@ ${expertName || 'Your Name'}`;
               ))}
             </div>
           )}
-        </div>
-      )}
+          
+          {currentTab === "rawData" && (
+            <div className="raw-data-view">
+              {/* User Data */}
+              {userData && (
+                <div className="form-group">
+                  <h2>User Data:</h2>
+                  {renderTable(userData, "Your Company Data")}
+                </div>
+              )}
 
-      {userData && (
-        <div className="form-group">
-          <h2>User Data:</h2>
-          {renderTable(userData, "Your Company Data")}
-        </div>
-      )}
+              {/* Competitor Data */}
+              {competitorData.length > 0 && (
+                <div className="form-group">
+                  <h2>Competitor Data:</h2>
+                  {competitorData.map((entry, i) => (
+                    <div key={i}>
+                      <h3>{entry.name} (CIK: {entry.cik})</h3>
+                      {entry.data &&
+                        Object.entries(entry.data).map(([key, df], j) => (
+                          <div key={j}>
+                            {renderTable(df, key)}
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-      {competitorData.length > 0 && (
-        <div className="form-group">
-          <h2>Competitor Data:</h2>
-          {competitorData.map((entry, i) => (
-            <div key={i}>
-              <h3>{entry.name} (CIK: {entry.cik})</h3>
-              {entry.data &&
-                Object.entries(entry.data).map(([key, df], j) => (
-                  <div key={j}>
-                    {renderTable(df, key)}
-                  </div>
-                ))}
+              {/* Economic Indicators */}
+              {fredData && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
+              
+              {/* Search Trends */}
+              {trendData && renderTimeSeriesTables(trendData, "Google Search Trends")}
             </div>
-          ))}
+          )}
         </div>
       )}
-
-      {fredData && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
-      {trendData && renderTimeSeriesTables(trendData, "Google Search Trends")}
 
       {showClientDataModal && renderClientDataModal()}
 
