@@ -150,14 +150,20 @@ export default function App() {
             </div>
   
             <div style={{ marginBottom: '2em' }}>
-              <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How accurate is the data?</h3>
-              <p>While LLMs can occasionally hallucinate, the risk here is very low because almost all metrics are computed algorithmically. The LLM's role is limited to phrasing the insights in natural language.</p>
+              <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How can I be sure the data is accurate?</h3>
+              <p>While LLMs can occasionally hallucinate, the risk here is very low because all metrics are computed algorithmically. The LLM's role is limited to phrasing the insights in natural language.</p>
               <p>For additional reassurance, you can:</p>
               <ul>
                 <li>Check the "Summarized Table View", which is created entirely by algorithms without LLMs.</li>
-                <li>Review the raw data view to verify the source numbers directly.</li>
+                <li>Review the raw fetched data view to verify the source numbers directly for competitor and economic data.</li>
               </ul>
             </div>
+            <div style={{ marginBottom: '2em' }}>
+    <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How is this different from just uploading my reports into a LLM and asking for a summary?</h3>
+    <p>Unlike pasting raw files into a proprietary LLM, our process is designed with security and accuracy in mind. Your financial files are never stored on our servers, and all calculations are done locally with formulas that ensure the numbers are accurate and directly relevant to your business. </p>
+    <p>These formulas also make the summaries more useful and tailored, since they highlight the most important trends and metrics rather than relying only on general text interpretation. In addition, we enrich your reports with external data sources—including competitor information from SEC filings, economic trends from FRED, and industry benchmarks—so you can see not only how your company is performing but also how you compare to others in your field and how broader economic changes may impact your business.</p>
+  </div>
+</div>
           </div>
         </div>
   
