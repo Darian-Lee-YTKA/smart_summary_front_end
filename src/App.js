@@ -159,11 +159,10 @@ export default function App() {
               </ul>
             </div>
             <div style={{ marginBottom: '2em' }}>
-    <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How is this different from just uploading my reports into a LLM and asking for a summary?</h3>
-    <p>Unlike pasting raw files into a proprietary LLM, our process is designed with security and accuracy in mind. Your financial files are never stored on our servers, and all calculations are done locally with formulas that ensure the numbers are accurate and directly relevant to your business. </p>
-    <p>These formulas also make the summaries more useful and tailored, since they highlight the most important trends and metrics rather than relying only on general text interpretation. In addition, we enrich your reports with external data sources—including competitor information from SEC filings, economic trends from FRED, and industry benchmarks—so you can see not only how your company is performing but also how you compare to others in your field and how broader economic changes may impact your business.</p>
-  </div>
-</div>
+              <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How is this different from just uploading my reports into a LLM and asking for a summary?</h3>
+              <p>Unlike pasting raw files into a proprietary LLM, our process is designed with security and accuracy in mind. Your financial files are never stored on our servers, and all calculations are done locally with formulas that ensure the numbers are accurate and directly relevant to your business. </p>
+              <p>These formulas also make the summaries more useful and tailored, since they highlight the most important trends and metrics rather than relying only on general text interpretation. In addition, we enrich your reports with external data sources—including competitor information from SEC filings, economic trends from FRED, and industry benchmarks—so you can see not only how your company is performing but also how you compare to others in your field and how broader economic changes may impact your business.</p>
+            </div>
           </div>
         </div>
   
@@ -182,7 +181,7 @@ export default function App() {
       </div>
     </div>
   );
-  
+
 
   const [editablePrompt, setEditablePrompt] = useState(`**Company Performance Analysis**
   Industry Overview
