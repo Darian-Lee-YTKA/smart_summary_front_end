@@ -10,6 +10,173 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 export default function App() {
 
   const { isSignedIn, user } = useUser();
+  const renderUserGuide = () => (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '2em',
+        borderRadius: '8px',
+        width: '95%',
+        maxWidth: '1000px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2em' }}>
+          <h1 style={{ margin: 0, color: '#333' }}>User Guide</h1>
+          <button
+            onClick={() => setShowUserGuide(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666'
+            }}
+          >
+            ×
+          </button>
+        </div>
+  
+        <div style={{ lineHeight: '1.6', fontSize: '16px', textAlign: 'left' }}>
+          <div style={{ marginBottom: '2em' }}>
+            <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 1</h2>
+            <p>Download your reports from Jirav in Excel or CSV format.</p>
+            <p style={{ fontStyle: 'italic', color: '#666', marginTop: '0.5em' }}>
+              (Note: This version only supports default report types. To learn how to export these reports in Jirav, watch the short video below.)
+            </p>
+            <div style={{ marginTop: '1em', textAlign: 'center' }}>
+              <img 
+                src="/videos/default_reports.gif"
+                alt="How to export default reports from Jirav"
+                style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #ddd' }}
+              />
+            </div>
+          </div>
+  
+          <div style={{ marginBottom: '2em' }}>
+            <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 2 (Optional)</h2>
+            <p>Click the icon on the left to create an account.</p>
+            <p style={{ fontWeight: 'bold', color: '#333' }}>Not required – you can still use the app without signing up.</p>
+            
+            <div style={{ backgroundColor: '#f0f8ff', padding: '1em', borderRadius: '8px', margin: '1em 0' }}>
+              <h4 style={{ margin: '0 0 0.5em 0', color: '#2196F3' }}>Why create an account?</h4>
+              <p style={{ margin: '0 0 0.5em 0' }}>Your non-sensitive company details and preferences will be saved, so you won't need to re-enter them each time.</p>
+              <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
+                <strong>Privacy note:</strong> We do not store your financial files. For security reasons, these must be uploaded again each session.
+              </p>
+            </div>
+  
+            <p>Without an account, all features remain available — you'll just need to re-enter your company information every time.</p>
+            
+            <div style={{ marginTop: '1em', textAlign: 'center' }}>
+              <img 
+                src="/videos/sign_in.gif"
+                alt="How to sign in to your account"
+                style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #ddd' }}
+              />
+            </div>
+          </div>
+  
+          <div style={{ marginBottom: '2em' }}>
+            <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 3</h2>
+            <p>Click "Edit Client Data" to set up your reports and industry information.</p>
+            <p>Here you can:</p>
+            <ul>
+              <li>Add competitors in your industry for comparison.</li>
+              <li>Include state-level and national economic trend data.</li>
+            </ul>
+            <p style={{ fontStyle: 'italic', color: '#666' }}>
+              The more details you provide, the more complete and useful your summary will be.
+            </p>
+            
+            <div style={{ marginTop: '1em', textAlign: 'center' }}>
+              <img 
+                src="/videos/add_your_data.gif"
+                alt="How to add your data and configure settings"
+                style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #ddd' }}
+              />
+            </div>
+          </div>
+  
+          <div style={{ marginBottom: '2em' }}>
+            <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 4</h2>
+            <p>Click "Get Report Summary" to generate your final report.</p>
+            <p>You can view it in three ways:</p>
+            <ul>
+              <li><strong>Text summary</strong> – a natural-language overview.</li>
+              <li><strong>Table view</strong> – key insights extracted from each report.</li>
+              <li><strong>Raw data view</strong> – unprocessed competitor and economic trend data.</li>
+            </ul>
+            
+            <div style={{ marginTop: '1em', display: 'flex', gap: '1em', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center', flex: '1', minWidth: '300px' }}>
+                <h4 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>Text View</h4>
+                <img 
+                  src="/text_view_img.png"
+                  alt="Text view example"
+                  style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #ddd' }}
+                />
+              </div>
+              <div style={{ textAlign: 'center', flex: '1', minWidth: '300px' }}>
+                <h4 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>Table View</h4>
+                <img 
+                  src="/table_view_img.png"
+                  alt="Table view example"
+                  style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #ddd' }}
+                />
+              </div>
+            </div>
+          </div>
+  
+          <div style={{ marginTop: '3em', borderTop: '2px solid #eee', paddingTop: '2em' }}>
+            <h2 style={{ color: '#333', marginBottom: '1em' }}>FAQs</h2>
+            
+            <div style={{ marginBottom: '2em' }}>
+              <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How are the summaries generated?</h3>
+              <p>We first parse your reports using formulas to calculate all metrics and insights, applying the same process to competitor and national data. These curated insights are then passed to the LLM, which turns them into clear, natural-language summaries.</p>
+            </div>
+  
+            <div style={{ marginBottom: '2em' }}>
+              <h3 style={{ color: '#4CAF50', marginBottom: '0.5em' }}>How accurate is the data?</h3>
+              <p>While LLMs can occasionally hallucinate, the risk here is very low because almost all metrics are computed algorithmically. The LLM's role is limited to phrasing the insights in natural language.</p>
+              <p>For additional reassurance, you can:</p>
+              <ul>
+                <li>Check the "Summarized Table View", which is created entirely by algorithms without LLMs.</li>
+                <li>Review the raw data view to verify the source numbers directly.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+  
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2em' }}>
+          <button 
+            className="primary-btn" 
+            onClick={() => setShowUserGuide(false)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px'
+            }}
+          >
+            Close Guide
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
 
   const [editablePrompt, setEditablePrompt] = useState(`**Company Performance Analysis**
   Industry Overview
@@ -60,6 +227,7 @@ export default function App() {
   const [inputStep, setInputStep] = useState("industryOrNaics");
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
+  const [showUserGuide, setShowUserGuide] = useState(false);
   
   // NEW: Add table formats and tab state
   const [tableFormats, setTableFormats] = useState([]);
@@ -1291,6 +1459,35 @@ export default function App() {
                 Get Report Summary 
               </button>
             </div>
+            
+            <div className="form-group" style={{ marginTop: '1em' }}>
+              <button
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: 'transparent',
+                  color: '#2196F3',
+                  border: '2px solid #2196F3',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => setShowUserGuide(true)}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#2196F3';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#2196F3';
+                }}
+                title="View User Guide"
+              >
+                NEW? See our user guide!
+              </button>
+            </div>
+
           </div>
         </>
       )}
@@ -1426,97 +1623,13 @@ ${expertName || 'Your Name'}`;
       )}
 
       {showClientDataModal && renderClientDataModal()}
+      {showUserGuide && renderUserGuide()}
 
       <img src={process.env.PUBLIC_URL + "/jirav.svg"} alt="Jirav logo" className="footer-logo" />
     </div>
   );
 }
 
-// Export functions
-const exportToPDF = async () => {
-  const element = document.getElementById('summary-content');
-  if (!element) return;
-  
-  try {
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true
-    });
-    
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    
-    let position = 0;
-    
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    
-    pdf.save('summary-report.pdf');
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Error generating PDF. Please try again.');
-  }
-};
 
-const exportToDOCX = async () => {
-  try {
-    // Convert markdown to plain text for DOCX
-    const plainText = externalSummary
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic formatting
-      .replace(/#{1,6}\s/g, '') // Remove headers
-      .replace(/\n\n/g, '\n') // Clean up line breaks
-      .trim();
-    
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Company Performance Analysis Report",
-                bold: true,
-                size: 32
-              })
-            ],
-            heading: HeadingLevel.TITLE
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: plainText,
-                size: 24
-              })
-            ]
-          })
-        ]
-      }]
-    });
-    
-    const buffer = await Packer.toBuffer(doc);
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'summary-report.docx';
-    link.click();
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error generating DOCX:', error);
-    alert('Error generating DOCX. Please try again.');
-  }
-};
+
 
