@@ -1307,31 +1307,64 @@ export default function App() {
         <div className="summary-container">
           <TabNavigation />
           
-          {/* Add Copy Email Template button */}
-          <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-            <button
-              onClick={copyFormattedText}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'hsl(17, 78%, 49%)', // Dark orange color
-                color: '#fff',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                whiteSpace: 'nowrap',
-                height: 'fit-content'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#eeb20ef3';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'hsl(17, 78%, 49%)';
-              }}
-            >
-              Copy Email Template
-            </button>
-          </div>
+          {/* Add Copy Email Template button - only show on text tab */}
+          {currentTab === "text" && (
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <button
+                onClick={async () => {
+                  try {
+                    // Convert markdown to plain text for email with proper formatting
+                    const plainTextSummary = externalSummary
+                      .replace(/^#+\s*(.*)$/gm, '$1:') // Add colons after headers
+                      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+                      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+                      .replace(/`(.*?)`/g, '$1') // Remove code markdown
+                      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to just text
+                      .replace(/^[-*+]\s+(.*)$/gm, '\t- $1') // Convert bullet points with proper tab spacing
+                      .replace(/^\d+\.\s+(.*)$/gm, '\t$1') // Convert numbered lists with tab spacing
+                      .replace(/\n\n/g, '\n\n') // Keep paragraph breaks
+                      .replace(/\n/g, '\n') // Keep line breaks
+                      .trim();
+
+                    // Format the summary for plain text email
+                    const plainTextEmail = `Dear Team,
+
+Please find below the comprehensive industry analysis report:
+
+${plainTextSummary}
+
+Best regards,
+${expertName || 'Your Name'}`;
+
+                    await navigator.clipboard.writeText(plainTextEmail);
+                    alert('Email template copied to clipboard! Ready to paste into your email.');
+                  } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard. Please try again.');
+                  }
+                }}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'hsl(17, 78%, 49%)', // Dark orange color
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  height: 'fit-content'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#eeb20ef3';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'hsl(17, 78%, 49%)';
+                }}
+              >
+                Copy Email Template
+              </button>
+            </div>
+          )}
           
           {currentTab === "text" && (
             <div className="text-view">
@@ -1468,46 +1501,6 @@ const exportToDOCX = async () => {
   } catch (error) {
     console.error('Error generating DOCX:', error);
     alert('Error generating DOCX. Please try again.');
-  }
-};
-
-const copyFormattedText = async () => {
-  try {
-    // Convert markdown to HTML for better formatting when pasted
-    const htmlContent = externalSummary
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>');
-    
-    const fullHtml = `<p>${htmlContent}</p>`;
-    
-    // Create a temporary element to copy HTML
-    const tempElement = document.createElement('div');
-    tempElement.innerHTML = fullHtml;
-    document.body.appendChild(tempElement);
-    
-    // Select and copy
-    const range = document.createRange();
-    range.selectNodeContents(tempElement);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    
-    document.execCommand('copy');
-    selection.removeAllRanges();
-    document.body.removeChild(tempElement);
-    
-    alert('Formatted text copied to clipboard!');
-  } catch (error) {
-    console.error('Error copying text:', error);
-    // Fallback to plain text
-    try {
-      await navigator.clipboard.writeText(externalSummary);
-      alert('Text copied to clipboard!');
-    } catch (fallbackError) {
-      alert('Error copying text. Please try again.');
-    }
   }
 };
 

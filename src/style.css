@@ -348,12 +348,17 @@ button:hover {
   text-align: left; /* Left align text summary */
 }
 
-/* Ensure text summary is left-aligned */
+/* Left-align all text with increased line spacing */
 .text-view h1, 
 .text-view h2, 
 .text-view h3, 
+.text-view h4, 
+.text-view h5, 
+.text-view h6,
 .text-view p, 
 .text-view ul, 
-.text-view ol {
+.text-view ol, 
+.text-view li {
   text-align: left;
+  line-height: 2.0;
 }
