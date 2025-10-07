@@ -53,7 +53,7 @@ export default function App() {
         <div style={{ lineHeight: '1.6', fontSize: '16px', textAlign: 'left' }}>
           <div style={{ marginBottom: '2em' }}>
             <h2 style={{ color: '#4CAF50', marginBottom: '1em' }}>Step 1</h2>
-            <p>Download your reports from Jirav in Excel or CSV format.</p>
+            <p>Download your default reports from Jirav in Excel or CSV format.</p>
             <p style={{ backgroundColor: '#FFE4B5', padding: '8px 12px', borderRadius: '5px', color: '#666', marginTop: '0.5em' }}>
               (Note: This version only supports <strong>default report types</strong>. To learn how to export these reports in Jirav, watch the short video below.)
             </p>
@@ -651,7 +651,14 @@ export default function App() {
 
     const response = await fetch(`https://external-data-backend.onrender.com/add_company_data/?${params.toString()}`);
     const data = await response.json();
-    setSuggestedCompanies(data);
+    
+    // Extract companies from the structured response
+    if (data.success && data.companies) {
+      setSuggestedCompanies(data.companies);
+    } else {
+      console.error("Error fetching companies:", data);
+      setSuggestedCompanies([]);
+    }
     setInputStep("selectCiks");
   };
   
@@ -1196,9 +1203,17 @@ export default function App() {
                 try {
                   const response = await fetch(`https://external-data-backend.onrender.com/add_company_data/?${params.toString()}`);
                   const data = await response.json();
-                  setSuggestedCompanies(data);
+                  
+                  // Extract companies from the structured response
+                  if (data.success && data.companies) {
+                    setSuggestedCompanies(data.companies);
+                  } else {
+                    console.error("Error fetching companies:", data);
+                    setSuggestedCompanies([]);
+                  }
                 } catch (error) {
                   console.error("Error fetching CIK suggestions:", error);
+                  setSuggestedCompanies([]);
                 } finally {
                   setLoadingCompetitorSuggestions(false);
                 }
