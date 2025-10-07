@@ -754,12 +754,20 @@ export default function App() {
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       const data = await response.json();
-      setExternalSummary(data.summary);
-      setUserData(data.user_data);
-      setCompetitorData(data.industry_tables);
-      setFredData(data.fred_data);
-      setTrendData(data.trends);
-      setTableFormats(data.table_formats || []); // ADD THIS LINE
+      
+      // Extract data from the structured response
+      if (data.success && data.data) {
+        const result = data.data;
+        setExternalSummary(result.summary);
+        setUserData(result.user_data);
+        setCompetitorData(result.industry_tables);
+        setFredData(result.fred_data);
+        setTrendData(result.trends);
+        setTableFormats(result.table_formats || []);
+      } else {
+        console.error("Error in API response:", data);
+        setExternalSummary("Error retrieving summary from backend.");
+      }
     } catch (error) {
       console.error("API error:", error);
       setExternalSummary("Error retrieving summary from backend.");
