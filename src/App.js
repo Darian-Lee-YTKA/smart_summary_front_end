@@ -759,10 +759,10 @@ export default function App() {
       if (data.success && data.data) {
         const result = data.data;
         setExternalSummary(result.summary);
-        setUserData(result.financial_analysis || {}); // Use financial_analysis instead of user_data
+        setUserData(result.financial_analysis || result.user_data || {});
         setCompetitorData(result.industry_tables || []);
         setFredData(result.fred_data || {});
-        setTrendData({}); // trends is not returned by backend
+        setTrendData(result.trends || {});
         setTableFormats(result.table_formats || []);
       } else {
         console.error("Error in API response:", data);
