@@ -712,7 +712,7 @@ export default function App() {
               return prev + (92 / 45); // Reach 92% in ~20 seconds (45 intervals)
             } else {
               // Slow progress from 92% to 95% (3x slower)
-              return prev + (3 / 40); // Increment by 0.075% every 0.5 seconds (20 intervals for remaining 8%)
+              return prev + (3 / 30); // Increment by 0.075% every 0.5 seconds (20 intervals for remaining 8%)
             }
           });
         }, 500);
