@@ -703,13 +703,19 @@ export default function App() {
     setUserData(null);
     setCompetitorData([]);
     
-    // Start progress bar simulation (35 seconds total)
-    let progressInterval = setInterval(() => {
-      setLoadingProgress(prev => {
-        if (prev >= 95) return prev; // Stop at 95% until API completes
-        return prev + (100 / 70); // Increment by ~1.43% every 0.5 seconds (70 intervals in 35 seconds)
-      });
-    }, 500);
+        // Start progress bar simulation (35 seconds total)
+        let progressInterval = setInterval(() => {
+          setLoadingProgress(prev => {
+            if (prev >= 95) return prev; // Stop at 95% until API completes
+            if (prev < 92) {
+              // Fast progress to 92% (normal rate)
+              return prev + (92 / 45); // Reach 92% in ~20 seconds (45 intervals)
+            } else {
+              // Slow progress from 92% to 95% (3x slower)
+              return prev + (3 / 40); // Increment by 0.075% every 0.5 seconds (20 intervals for remaining 8%)
+            }
+          });
+        }, 500);
 
     try {
           const naicsCodeValue = naicsCode;
