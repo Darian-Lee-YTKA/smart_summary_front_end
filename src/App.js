@@ -1618,17 +1618,6 @@ ${expertName || 'Your Name'}`;
           
           {currentTab === "rawData" && (
             <div className="raw-data-view">
-              {/* User Data */}
-              {userData && Object.keys(userData).length > 0 && (
-                <div className="form-group">
-                  <h2>User Data:</h2>
-                  {Array.isArray(userData) ? renderTable(userData, "Your Company Data") : 
-                   <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
-                     {JSON.stringify(userData, null, 2)}
-                   </pre>}
-                </div>
-              )}
-
               {/* Competitor Data */}
               {competitorData && competitorData.length > 0 && (
                 <div className="form-group">
@@ -1636,9 +1625,10 @@ ${expertName || 'Your Name'}`;
                   {competitorData.map((entry, i) => (
                     <div key={i}>
                       <h3>{entry.name || 'Unknown Company'} (CIK: {entry.cik || 'Unknown'})</h3>
-                      {entry.data && typeof entry.data === 'object' &&
-                        Object.entries(entry.data).map(([key, df], j) => (
+                      {entry.raw_data && typeof entry.raw_data === 'object' &&
+                        Object.entries(entry.raw_data).map(([key, df], j) => (
                           <div key={j}>
+                            <h4>{key}</h4>
                             {Array.isArray(df) ? renderTable(df, key) : 
                              <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
                                {JSON.stringify(df, null, 2)}
@@ -1652,9 +1642,6 @@ ${expertName || 'Your Name'}`;
 
               {/* Economic Indicators */}
               {fredData && Object.keys(fredData).length > 0 && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
-              
-              {/* Search Trends */}
-              {trendData && Object.keys(trendData).length > 0 && renderTimeSeriesTables(trendData, "Google Search Trends")}
             </div>
           )}
         </div>
