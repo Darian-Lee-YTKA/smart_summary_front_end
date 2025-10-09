@@ -703,11 +703,11 @@ export default function App() {
     setUserData(null);
     setCompetitorData([]);
     
-    // Start progress bar simulation (25 seconds total)
-    const progressInterval = setInterval(() => {
+    // Start progress bar simulation (31 seconds total)
+    let progressInterval = setInterval(() => {
       setLoadingProgress(prev => {
         if (prev >= 95) return prev; // Stop at 95% until API completes
-        return prev + (100 / 50); // Increment by 2% every 0.5 seconds (50 intervals in 25 seconds)
+        return prev + (100 / 62); // Increment by ~1.6% every 0.5 seconds (62 intervals in 31 seconds)
       });
     }, 500);
 
@@ -782,7 +782,9 @@ export default function App() {
       console.error("API error:", error);
       setExternalSummary("Error retrieving summary from backend.");
     } finally {
-      clearInterval(progressInterval);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setLoadingProgress(100);
       setLoading(false);
     }
@@ -1652,29 +1654,32 @@ ${expertName || 'Your Name'}`;
           {currentTab === "rawData" && (
             <div className="raw-data-view">
               {/* Competitor Data */}
-              {competitorData && competitorData.length > 0 && (
+              {competitorData && Array.isArray(competitorData) && competitorData.length > 0 && (
                 <div className="form-group">
                   <h2>Competitor Data:</h2>
-                  {competitorData.map((entry, i) => (
-                    <div key={i}>
-                      <h3>{entry.name || 'Unknown Company'} (CIK: {entry.cik || 'Unknown'})</h3>
-                      {entry.raw_data && typeof entry.raw_data === 'object' &&
-                        Object.entries(entry.raw_data).map(([key, df], j) => (
-                          <div key={j}>
-                            <h4>{key}</h4>
-                            {Array.isArray(df) ? renderTable(df, null) : 
-                             <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
-                               {JSON.stringify(df, null, 2)}
-                             </pre>}
-                          </div>
-                        ))}
-                    </div>
-                  ))}
+                  {competitorData.map((entry, i) => {
+                    if (!entry || typeof entry !== 'object') return null;
+                    return (
+                      <div key={i}>
+                        <h3>{entry.name || 'Unknown Company'} (CIK: {entry.cik || 'Unknown'})</h3>
+                        {entry.raw_data && typeof entry.raw_data === 'object' &&
+                          Object.entries(entry.raw_data).map(([key, df], j) => (
+                            <div key={j}>
+                              <h4>{key}</h4>
+                              {Array.isArray(df) ? renderTable(df, null) : 
+                               <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
+                                 {JSON.stringify(df, null, 2)}
+                               </pre>}
+                            </div>
+                          ))}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
               {/* Economic Indicators */}
-              {fredData && Object.keys(fredData).length > 0 && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
+              {fredData && typeof fredData === 'object' && Object.keys(fredData).length > 0 && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
             </div>
           )}
         </div>
