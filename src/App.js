@@ -1619,24 +1619,30 @@ ${expertName || 'Your Name'}`;
           {currentTab === "rawData" && (
             <div className="raw-data-view">
               {/* User Data */}
-              {userData && (
+              {userData && Object.keys(userData).length > 0 && (
                 <div className="form-group">
                   <h2>User Data:</h2>
-                  {renderTable(userData, "Your Company Data")}
+                  {Array.isArray(userData) ? renderTable(userData, "Your Company Data") : 
+                   <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
+                     {JSON.stringify(userData, null, 2)}
+                   </pre>}
                 </div>
               )}
 
               {/* Competitor Data */}
-              {competitorData.length > 0 && (
+              {competitorData && competitorData.length > 0 && (
                 <div className="form-group">
                   <h2>Competitor Data:</h2>
                   {competitorData.map((entry, i) => (
                     <div key={i}>
-                      <h3>{entry.name} (CIK: {entry.cik})</h3>
-                      {entry.data &&
+                      <h3>{entry.name || 'Unknown Company'} (CIK: {entry.cik || 'Unknown'})</h3>
+                      {entry.data && typeof entry.data === 'object' &&
                         Object.entries(entry.data).map(([key, df], j) => (
                           <div key={j}>
-                            {renderTable(df, key)}
+                            {Array.isArray(df) ? renderTable(df, key) : 
+                             <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
+                               {JSON.stringify(df, null, 2)}
+                             </pre>}
                           </div>
                         ))}
                     </div>
@@ -1645,10 +1651,10 @@ ${expertName || 'Your Name'}`;
               )}
 
               {/* Economic Indicators */}
-              {fredData && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
+              {fredData && Object.keys(fredData).length > 0 && renderTimeSeriesTables(fredData, "Economic Indicators (FRED)")}
               
               {/* Search Trends */}
-              {trendData && renderTimeSeriesTables(trendData, "Google Search Trends")}
+              {trendData && Object.keys(trendData).length > 0 && renderTimeSeriesTables(trendData, "Google Search Trends")}
             </div>
           )}
         </div>
