@@ -229,6 +229,7 @@ export default function App() {
   const [userData, setUserData] = useState(null);
   const [competitorData, setCompetitorData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [inputStep, setInputStep] = useState("industryOrNaics");
   const [userOpinion, setUserOpinion] = useState("");
   const [showClientDataModal, setShowClientDataModal] = useState(false);
@@ -697,9 +698,18 @@ export default function App() {
 
     console.log('Validation passed, proceeding with API call');
     setLoading(true);
+    setLoadingProgress(0);
     setExternalSummary("");
     setUserData(null);
     setCompetitorData([]);
+    
+    // Start progress bar simulation (45 seconds total)
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 95) return prev; // Stop at 95% until API completes
+        return prev + (100 / 45); // Increment by ~2.2% per second
+      });
+    }, 1000);
 
     try {
           const naicsCodeValue = naicsCode;
@@ -772,6 +782,8 @@ export default function App() {
       console.error("API error:", error);
       setExternalSummary("Error retrieving summary from backend.");
     } finally {
+      clearInterval(progressInterval);
+      setLoadingProgress(100);
       setLoading(false);
     }
   };
@@ -1533,8 +1545,29 @@ export default function App() {
           border: '1px solid #ddd',
           marginBottom: '2em'
         }}>
-          <p style={{ fontSize: '16px', color: '#666', margin: 0 }}>
+          <p style={{ fontSize: '16px', color: '#666', margin: '0 0 1em 0' }}>
             Generating your industry analysis summary...
+          </p>
+          
+          {/* Progress Bar */}
+          <div style={{
+            width: '100%',
+            backgroundColor: '#e0e0e0',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            marginBottom: '0.5em'
+          }}>
+            <div style={{
+              width: `${loadingProgress}%`,
+              height: '20px',
+              backgroundColor: '#4CAF50',
+              transition: 'width 0.3s ease',
+              borderRadius: '10px'
+            }} />
+          </div>
+          
+          <p style={{ fontSize: '14px', color: '#888', margin: 0 }}>
+            {Math.round(loadingProgress)}% complete
           </p>
         </div>
       )}
