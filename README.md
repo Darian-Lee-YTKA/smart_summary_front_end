@@ -184,13 +184,3 @@ The backend returns structured responses:
 }
 ```
 
-## Contributing
-
-Please note that this codebase is AI-assisted and may not follow conventional React patterns. If contributing, consider:
-- Improving component separation
-- Adding proper error boundaries
-- Implementing better state management
-- Adding TypeScript for type safety
-- Improving accessibility features
-
----
