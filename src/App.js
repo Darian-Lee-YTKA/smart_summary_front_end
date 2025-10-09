@@ -703,13 +703,13 @@ export default function App() {
     setUserData(null);
     setCompetitorData([]);
     
-    // Start progress bar simulation (45 seconds total)
+    // Start progress bar simulation (25 seconds total)
     const progressInterval = setInterval(() => {
       setLoadingProgress(prev => {
         if (prev >= 95) return prev; // Stop at 95% until API completes
-        return prev + (100 / 45); // Increment by ~2.2% per second
+        return prev + (100 / 50); // Increment by 2% every 0.5 seconds (50 intervals in 25 seconds)
       });
-    }, 1000);
+    }, 500);
 
     try {
           const naicsCodeValue = naicsCode;
