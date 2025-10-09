@@ -1629,7 +1629,7 @@ ${expertName || 'Your Name'}`;
                         Object.entries(entry.raw_data).map(([key, df], j) => (
                           <div key={j}>
                             <h4>{key}</h4>
-                            {Array.isArray(df) ? renderTable(df, key) : 
+                            {Array.isArray(df) ? renderTable(df, null) : 
                              <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
                                {JSON.stringify(df, null, 2)}
                              </pre>}
