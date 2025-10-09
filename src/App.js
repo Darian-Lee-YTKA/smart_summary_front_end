@@ -703,11 +703,11 @@ export default function App() {
     setUserData(null);
     setCompetitorData([]);
     
-    // Start progress bar simulation (31 seconds total)
+    // Start progress bar simulation (35 seconds total)
     let progressInterval = setInterval(() => {
       setLoadingProgress(prev => {
         if (prev >= 95) return prev; // Stop at 95% until API completes
-        return prev + (100 / 62); // Increment by ~1.6% every 0.5 seconds (62 intervals in 31 seconds)
+        return prev + (100 / 70); // Increment by ~1.43% every 0.5 seconds (70 intervals in 35 seconds)
       });
     }, 500);
 
@@ -1665,13 +1665,17 @@ ${expertName || 'Your Name'}`;
                         {entry.raw_data && typeof entry.raw_data === 'object' &&
                           Object.entries(entry.raw_data).map(([key, df], j) => (
                             <div key={j}>
-                              <h4>{key}</h4>
-                              {Array.isArray(df) ? renderTable(df, null) : 
+                              {Array.isArray(df) ? renderTable(df, key) : 
                                <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
                                  {JSON.stringify(df, null, 2)}
                                </pre>}
                             </div>
                           ))}
+                        {/* Fallback: show raw data structure for debugging if no raw_data */}
+                        {(!entry.raw_data || typeof entry.raw_data !== 'object') && 
+                          <pre style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '5px'}}>
+                            {JSON.stringify(entry, null, 2)}
+                          </pre>}
                       </div>
                     );
                   })}
